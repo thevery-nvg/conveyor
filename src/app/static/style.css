@@ -1,0 +1,161 @@
+      body {
+            font-family: 'Courier New', monospace;
+            background-color: black;
+            color: #0F0;
+            margin: 0;
+            padding: 20px;
+            overflow-x: hidden;
+        }
+
+        h1 {
+            color: #0F0;
+            text-shadow: 0 0 5px #0F0;
+            border-bottom: 1px dashed #0F0;
+            padding-bottom: 10px;
+            font-size: 24px;
+            letter-spacing: 2px;
+        }
+
+        .video-container {
+            display: flex;
+            gap: 20px;
+            margin-bottom: 20px;
+        }
+
+        #videoFeed {
+            width: 960px;
+            height: 540px;
+            background: black;
+            border: 2px solid #0F0;
+            box-shadow: 0 0 10px #0F0;
+        }
+
+        .analysis-panel {
+            width: 300px;
+            height: 512px;
+            border: 1px solid #0F0;
+            padding: 15px;
+            background: rgba(0, 20, 0, 0.2);
+            overflow-y: auto;
+            position: relative;
+        }
+
+        .analysis-panel h3 {
+            margin-top: 0;
+            border-bottom: 1px dashed #0F0;
+            padding-bottom: 5px;
+            color: #0F0;
+        }
+
+        .analysis-item {
+            margin-bottom: 10px;
+            padding-bottom: 10px;
+            border-bottom: 1px dotted rgba(0, 255, 0, 0.2);
+        }
+
+        .status {
+            margin-top: 10px;
+            padding: 15px;
+            background: rgba(0, 30, 0, 0.3);
+            border: 1px solid #0F0;
+            border-radius: 0;
+            font-size: 18px;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .status:before {
+            content: "";
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 1px;
+            background: linear-gradient(to right, transparent, #0F0, transparent);
+            animation: scanline 3s linear infinite;
+        }
+
+        @keyframes scanline {
+            0% { top: 0; }
+            100% { top: 100%; }
+        }
+
+        @keyframes flicker {
+            0% { opacity: 0.9; }
+            50% { opacity: 1; }
+            100% { opacity: 0.9; }
+        }
+
+        body {
+            animation: flicker 0.1s infinite alternate;
+        }
+
+        #bufferStatus, #delay {
+            color: #FF0;
+            font-weight: bold;
+        }
+
+        body:after {
+            content: "";
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background:
+                linear-gradient(rgba(0, 255, 0, 0.03) 1px, transparent 1px),
+                linear-gradient(90deg, rgba(0, 255, 0, 0.03) 1px, transparent 1px);
+            background-size: 3px 3px;
+            pointer-events: none;
+            z-index: -1;
+        }
+
+        .loading {
+            position: fixed;
+            bottom: 10px;
+            right: 10px;
+            color: #0F0;
+            font-size: 12px;
+        }
+
+        .loading:after {
+            content: "...";
+            animation: dots 1.5s infinite;
+        }
+
+        @keyframes dots {
+            0%, 20% { content: "."; }
+            40% { content: ".."; }
+            60%, 100% { content: "..."; }
+        }
+
+        /* Стили для полосы прокрутки */
+        .analysis-panel::-webkit-scrollbar {
+            width: 5px;
+        }
+
+        .analysis-panel::-webkit-scrollbar-track {
+            background: rgba(0, 20, 0, 0.1);
+        }
+
+        .analysis-panel::-webkit-scrollbar-thumb {
+            background: #0F0;
+        }
+
+        .critical {
+            color: #F00 !important;
+            animation: blink 0.5s infinite alternate;
+        }
+
+        .warning {
+            color: #FF0 !important;
+        }
+
+        .success {
+            color: #0F0 !important;
+        }
+
+        @keyframes blink {
+            0% { opacity: 0.3; }
+            100% { opacity: 1; }
+        }
