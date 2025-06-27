@@ -1,3 +1,5 @@
+from datetime import datetime
+
 import cv2
 import time
 from multiprocessing import Queue
@@ -14,19 +16,18 @@ def frame_producer(video_path: str, output_queue: Queue,shared_dict):
             ret, frame = cap.read()
             if not ret:
                 break
-
             # Ограничиваем размер очереди
             if output_queue.qsize() > 50:
                 time.sleep(0.1)
                 continue
-
-            frame_data = {
-                'frame': frame,
-                'timestamp': time.time(),
-                'frame_num': frame_num
-            }
-
-            output_queue.put(frame_data)
+            if frame_num %2:
+                frame_data = {
+                    'frame': frame,
+                    'timestamp': time.time(),
+                    'frame_num': frame_num,
+                    "time": datetime.now()
+                }
+                output_queue.put(frame_data)
             frame_num += 1
 
             # Имитация реального времени
