@@ -1,3 +1,5 @@
+from collections import deque
+
 import cv2
 from ultralytics.engine.results import Results
 import numpy as np
@@ -42,6 +44,26 @@ def draw_boxes_from_roi(results: list[Results],frame: np.ndarray,roi_x1:int,roi_
             label = f"ID: {track_id}"
             cv2.putText(frame, label, (int(x1) + 10, int(y1) + 30),cv2.FONT_HERSHEY_SIMPLEX, 0.6, (0, 255, 0), 2)
 
+TRACK_HISTORY = deque(maxlen=30)
+def draw_boxes_with_recovery(frame, results):
+    global TRACK_HISTORY
+
+    if results[0].boxes.id is not None:
+        TRACK_HISTORY.append(results)
+    elif len(TRACK_HISTORY) > 0:
+        results = TRACK_HISTORY[-1]
+    if results[0].boxes.id is not None:
+        boxes = results[0].boxes.xyxy.cpu()
+        track_ids = results[0].boxes.id.int().cpu().tolist()
+        classes = results[0].boxes.cls.int().cpu().tolist()
+        confidences = results[0].boxes.conf.cpu().tolist()
+        for box, track_id, cls, conf in zip(boxes, track_ids, classes, confidences):
+            x1, y1, x2, y2 = box
+            cv2.rectangle(frame, (int(x1), int(y1)), (int(x2), int(y2)), (0, 255, 0), 2)
+            label = f"ID: {track_id}"
+            cv2.putText(frame, label, (int(x1) + 10, int(y1) + 30),
+                        cv2.FONT_HERSHEY_SIMPLEX, 0.6, (0, 255, 0), 2)
+    return frame
 
 def get_video_params(cap: cv2.VideoCapture)-> dict:
     # Получение параметров видео

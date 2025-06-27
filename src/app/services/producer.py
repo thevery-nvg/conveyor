@@ -11,18 +11,22 @@ def frame_producer(video_path: str, output_queue: Queue,shared_dict):
     cap = cv2.VideoCapture(video_path)
     frame_num = 0
     shared_dict.update(get_video_params(cap))
+    skip_frames = 2
+    roi_x1, roi_x2 = 550, 1800
+    roi_y1, roi_y2 = 230, 850
     try:
         while cap.isOpened():
             ret, frame = cap.read()
             if not ret:
                 break
+
             # Ограничиваем размер очереди
-            if output_queue.qsize() > 50:
+            if output_queue.qsize() > 100:
                 time.sleep(0.1)
                 continue
-            if frame_num %2:
+            if frame_num % (skip_frames + 1) != 1:
                 frame_data = {
-                    'frame': frame,
+                    'frame': frame[roi_y1:roi_y2, roi_x1:roi_x2],
                     'timestamp': time.time(),
                     'frame_num': frame_num,
                     "time": datetime.now()

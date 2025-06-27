@@ -144,7 +144,7 @@ async function updateTortillaStats() {
         statsContainer.appendChild(errorItem);
     }
 
-    setTimeout(updateTortillaStats, 200);
+    setTimeout(updateTortillaStats, 20);
 }
 
 // Автопереподключение видео при ошибке

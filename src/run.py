@@ -1,3 +1,4 @@
+import datetime
 import queue
 from contextlib import asynccontextmanager
 from fastapi import FastAPI, Request
@@ -16,12 +17,13 @@ from app.middlewares.track_clients import track_clients_middleware
 from app.services.consumer import frame_consumer
 from app.services.producer import frame_producer
 from app.services.manager import client_manager,app_state
-from src.app.services.utils import draw_boxes_from_roi
+from src.app.services.utils import draw_boxes_from_roi, draw_boxes, draw_boxes_with_recovery
 
 templates = Jinja2Templates(directory="templates")
 
 # Глобальные буферы
 DISPLAY_BUFFER = deque(maxlen=50)
+
 lock = threading.Lock()
 
 @asynccontextmanager
@@ -31,6 +33,7 @@ async def lifespan(application: FastAPI):
     result_queue = Queue(maxsize=100)
     manager = Manager()
     shared_dict=manager.dict()
+    shared_dict['avg_time']=0
     producer = Process(
         target=frame_producer,
         args=("D:\\Python\\tortillas_static\\data\\video\\vid1.avi", input_queue,shared_dict)
@@ -43,7 +46,7 @@ async def lifespan(application: FastAPI):
 
     threading.Thread(
         target=result_consumer,
-        args=(result_queue,),
+        args=(result_queue,shared_dict),
         daemon=True
     ).start()
 
@@ -75,9 +78,10 @@ app = FastAPI(lifespan=lifespan)
 app.middleware("http")(track_clients_middleware)
 app.mount("/static", StaticFiles(directory="static"), name="static")
 
-def result_consumer(result_queue: Queue):
-    roi_x1, roi_x2 = 550, 1800
-    roi_y1, roi_y2 = 230, 850
+
+
+
+def result_consumer(result_queue: Queue, shared_dict):
     try:
         while True:
             try:
@@ -90,8 +94,8 @@ def result_consumer(result_queue: Queue):
                         DISPLAY_BUFFER.pop()
                     frame = result['frame']
                     results = result['results']
-                    draw_boxes_from_roi(results, frame, roi_x1, roi_y1)
-                    result['frame'] = frame
+                    shared_dict['frame_num'] = result['frame_num']
+                    draw_boxes_with_recovery(frame,results)
                     DISPLAY_BUFFER.append(result)
 
             except queue.Empty:
@@ -112,7 +116,6 @@ def generate_frames(client_id: str):
                 continue
             last_frame_num = current_frame['frame_num']
             frame = current_frame['frame']
-
         _, buffer = cv2.imencode('.jpg', frame)
         yield (b'--frame\r\n'
                b'Content-Type: image/jpeg\r\n\r\n' + buffer.tobytes() + b'\r\n')
@@ -141,21 +144,18 @@ async def buffer_status():
     return {
         "buffer_size": len(DISPLAY_BUFFER),
         "delay_seconds": len(DISPLAY_BUFFER) / app_state.shared_dict.get('fps',25),
-        "clients_count": len(client_manager.active_clients)
+        "clients_count": len(client_manager.active_clients),
     }
 
 
-@app.get("/status")
-async def status():
+@app.get("/tortilla_stats")
+async def tortilla_stats():
     return {
         "producer_alive": app_state.producer.is_alive(),
         "consumer_alive": app_state.consumer.is_alive(),
-        "queues_size": {
-            "input": app_state.queues[0].qsize() if app_state.queues else 0,
-            "result": app_state.queues[1].qsize() if app_state.queues else 0
-        }
+        "queue_input": app_state.queues[0].qsize() if app_state.queues else 0,
+        "queue_result": app_state.queues[1].qsize() if app_state.queues else 0,
     }
-
 
 if __name__ == '__main__':
     import uvicorn
