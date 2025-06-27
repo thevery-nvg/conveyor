@@ -19,14 +19,15 @@ def frame_producer(video_path: str, output_queue: Queue,shared_dict):
             ret, frame = cap.read()
             if not ret:
                 break
-
+            roi_frame = frame[roi_y1:roi_y2, roi_x1:roi_x2].copy()
+            del frame
             # Ограничиваем размер очереди
-            if output_queue.qsize() > 100:
+            if output_queue.qsize() > 50:
                 time.sleep(0.1)
                 continue
             if frame_num % (skip_frames + 1) != 1:
                 frame_data = {
-                    'frame': frame[roi_y1:roi_y2, roi_x1:roi_x2],
+                    'frame': roi_frame,
                     'timestamp': time.time(),
                     'frame_num': frame_num,
                     "time": datetime.now()

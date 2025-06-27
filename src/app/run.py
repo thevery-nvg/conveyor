@@ -29,8 +29,8 @@ lock = threading.Lock()
 @asynccontextmanager
 async def lifespan(application: FastAPI):
     # startup
-    input_queue = Queue(maxsize=100)
-    result_queue = Queue(maxsize=100)
+    input_queue = Queue(maxsize=50)
+    result_queue = Queue(maxsize=50)
     manager = Manager()
     shared_dict=manager.dict()
     shared_dict['avg_time']=0
@@ -95,7 +95,7 @@ def result_consumer(result_queue: Queue, shared_dict):
                     frame = result['frame']
                     results = result['results']
                     shared_dict['frame_num'] = result['frame_num']
-                    draw_boxes_with_recovery(frame,results)
+                    draw_boxes(frame,results)
                     DISPLAY_BUFFER.append(result)
 
             except queue.Empty:

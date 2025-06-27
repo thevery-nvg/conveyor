@@ -18,16 +18,17 @@ def frame_consumer(input_queue: Queue, output_queue: Queue):
     try:
         while True:
             try:
-
                 frame_data = input_queue.get(timeout=1.0)
                 if frame_data is None:
                     break
 
                 # Ограничиваем размер очереди результатов
-                if output_queue.qsize() > 100:
+                if output_queue.qsize() > 50:
                     continue
                 frame = frame_data['frame']
+                frame_buffer = frame_buffer[-5:] if len(frame_buffer) > 5 else frame_buffer
                 frame_buffer.append(frame)
+                torch.cuda.empty_cache()
                 # roi = frame[roi_y1:roi_y2, roi_x1:roi_x2]
                 with torch.no_grad():
                     results = model.track(
@@ -56,7 +57,6 @@ def frame_consumer(input_queue: Queue, output_queue: Queue):
                     'results': results,
                     'timestamp': frame_data['timestamp'],
                     'frame_num': frame_data['frame_num'],
-                    'processing_time': time.time() - frame_data['timestamp']
                 }
 
                 output_queue.put(result_data)
