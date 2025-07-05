@@ -1,5 +1,5 @@
 import datetime
-import queue
+
 from contextlib import asynccontextmanager
 from fastapi import FastAPI, Request
 from fastapi.responses import StreamingResponse, HTMLResponse
@@ -10,7 +10,6 @@ import cv2
 from collections import deque
 import threading
 import uuid
-import time
 
 
 from app.middlewares.track_clients import track_clients_middleware
@@ -18,13 +17,11 @@ from app.services.consumer import frame_consumer
 from app.services.producer import frame_producer
 from app.services.manager import client_manager,app_state
 from src.app.services.utils import draw_boxes_from_roi, draw_boxes, draw_boxes_with_recovery
-
+from src.app.services.common import DISPLAY_BUFFER,lock,result_consumer,generate_frames
+from src.app.views.core import router
 templates = Jinja2Templates(directory="templates")
 
-# Глобальные буферы
-DISPLAY_BUFFER = deque(maxlen=50)
 
-lock = threading.Lock()
 
 @asynccontextmanager
 async def lifespan(application: FastAPI):
@@ -34,6 +31,7 @@ async def lifespan(application: FastAPI):
     manager = Manager()
     shared_dict=manager.dict()
     shared_dict['avg_time']=0
+    shared_dict['count_tortillas']=0
     producer = Process(
         target=frame_producer,
         args=("D:\\Python\\tortillas_static\\data\\video\\vid1.avi", input_queue,shared_dict)
@@ -41,7 +39,7 @@ async def lifespan(application: FastAPI):
 
     consumer = Process(
         target=frame_consumer,
-        args=(input_queue, result_queue)
+        args=(input_queue, result_queue,shared_dict)
     )
 
     threading.Thread(
@@ -77,48 +75,8 @@ async def lifespan(application: FastAPI):
 app = FastAPI(lifespan=lifespan)
 app.middleware("http")(track_clients_middleware)
 app.mount("/static", StaticFiles(directory="static"), name="static")
+app.include_router(router)
 
-
-
-
-def result_consumer(result_queue: Queue, shared_dict):
-    try:
-        while True:
-            try:
-                result = result_queue.get(timeout=1.0)
-                if result is None:
-                    break
-
-                with lock:
-                    if DISPLAY_BUFFER:
-                        DISPLAY_BUFFER.pop()
-                    frame = result['frame']
-                    results = result['results']
-                    shared_dict['frame_num'] = result['frame_num']
-                    draw_boxes(frame,results)
-                    DISPLAY_BUFFER.append(result)
-
-            except queue.Empty:
-                continue
-    finally:
-        pass
-
-
-def generate_frames(client_id: str):
-    last_frame_num = -1
-    while True:
-        with lock:
-            if not DISPLAY_BUFFER:
-                continue
-            current_frame = DISPLAY_BUFFER[-1]
-            if current_frame['frame_num'] == last_frame_num:
-                time.sleep(0.01)
-                continue
-            last_frame_num = current_frame['frame_num']
-            frame = current_frame['frame']
-        _, buffer = cv2.imencode('.jpg', frame)
-        yield (b'--frame\r\n'
-               b'Content-Type: image/jpeg\r\n\r\n' + buffer.tobytes() + b'\r\n')
 
 
 @app.get("/", response_class=HTMLResponse)
@@ -128,34 +86,6 @@ async def video_page(request: Request):
         {"request": request, "title": "Stream"}
     )
 
-
-@app.get("/video_feed")
-async def video_feed(request: Request):
-    client_id = request.headers.get('X-Client-ID', str(uuid.uuid4()))
-    return StreamingResponse(
-        generate_frames(client_id),
-        media_type="multipart/x-mixed-replace; boundary=frame",
-        headers={'X-Client-ID': client_id}
-    )
-
-
-@app.get("/buffer_status")
-async def buffer_status():
-    return {
-        "buffer_size": len(DISPLAY_BUFFER),
-        "delay_seconds": len(DISPLAY_BUFFER) / app_state.shared_dict.get('fps',25),
-        "clients_count": len(client_manager.active_clients),
-    }
-
-
-@app.get("/tortilla_stats")
-async def tortilla_stats():
-    return {
-        "producer_alive": app_state.producer.is_alive(),
-        "consumer_alive": app_state.consumer.is_alive(),
-        "queue_input": app_state.queues[0].qsize() if app_state.queues else 0,
-        "queue_result": app_state.queues[1].qsize() if app_state.queues else 0,
-    }
 
 if __name__ == '__main__':
     import uvicorn

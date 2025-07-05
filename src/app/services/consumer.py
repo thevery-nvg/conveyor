@@ -9,7 +9,7 @@ torch.backends.cudnn.benchmark = True
 torch.backends.cuda.enable_flash_sdp(True)  # Для RTX 30XX+
 torch.set_flush_denormal(True)
 
-def frame_consumer(input_queue: Queue, output_queue: Queue):
+def frame_consumer(input_queue: Queue, output_queue: Queue,shared_dict):
     #pip install torch torchvision --extra-index-url https://download.pytorch.org/whl/cu118
     model = YOLO(model="D:\\Python\\conveyor\\src\\models\\best_for_tracking_512.pt").to("cuda")
     tracker_config = "bytetrack.yaml"
@@ -29,7 +29,6 @@ def frame_consumer(input_queue: Queue, output_queue: Queue):
                 frame_buffer = frame_buffer[-5:] if len(frame_buffer) > 5 else frame_buffer
                 frame_buffer.append(frame)
                 torch.cuda.empty_cache()
-                # roi = frame[roi_y1:roi_y2, roi_x1:roi_x2]
                 with torch.no_grad():
                     results = model.track(
                         source=frame,
@@ -39,6 +38,7 @@ def frame_consumer(input_queue: Queue, output_queue: Queue):
                         device='cuda',
                         half=True,  # FP16 ускорение
                         imgsz=512,
+                        verbose=True,
                         classes=[0]
                     )
                 if results[0].boxes.id is None and len(frame_buffer) > 1:
