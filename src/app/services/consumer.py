@@ -1,8 +1,6 @@
 import queue
 from ultralytics import YOLO
 from multiprocessing import Queue
-import time
-import numpy as np
 import torch
 
 torch.backends.cudnn.benchmark = True

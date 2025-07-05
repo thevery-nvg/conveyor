@@ -1,26 +1,19 @@
-import datetime
-
 from contextlib import asynccontextmanager
 from fastapi import FastAPI, Request
-from fastapi.responses import StreamingResponse, HTMLResponse
+from fastapi.responses import HTMLResponse
 from fastapi.templating import Jinja2Templates
 from fastapi.staticfiles import StaticFiles
-from multiprocessing import Queue, Process,Manager
-import cv2
-from collections import deque
+from multiprocessing import Queue, Process, Manager
 import threading
-import uuid
-
 
 from app.middlewares.track_clients import track_clients_middleware
 from app.services.consumer import frame_consumer
 from app.services.producer import frame_producer
-from app.services.manager import client_manager,app_state
-from src.app.services.utils import draw_boxes_from_roi, draw_boxes, draw_boxes_with_recovery
-from src.app.services.common import DISPLAY_BUFFER,lock,result_consumer,generate_frames
+from app.services.manager import app_state
+from src.app.services.common import result_consumer
 from src.app.views.core import router
-templates = Jinja2Templates(directory="templates")
 
+templates = Jinja2Templates(directory="templates")
 
 
 @asynccontextmanager
@@ -29,22 +22,22 @@ async def lifespan(application: FastAPI):
     input_queue = Queue(maxsize=50)
     result_queue = Queue(maxsize=50)
     manager = Manager()
-    shared_dict=manager.dict()
-    shared_dict['avg_time']=0
-    shared_dict['count_tortillas']=0
+    shared_dict = manager.dict()
+    shared_dict['avg_time'] = 0
+    shared_dict['count_tortillas'] = 0
     producer = Process(
         target=frame_producer,
-        args=("D:\\Python\\tortillas_static\\data\\video\\vid1.avi", input_queue,shared_dict)
+        args=("D:\\Python\\tortillas_static\\data\\video\\vid1.avi", input_queue, shared_dict)
     )
 
     consumer = Process(
         target=frame_consumer,
-        args=(input_queue, result_queue,shared_dict)
+        args=(input_queue, result_queue, shared_dict)
     )
 
     threading.Thread(
         target=result_consumer,
-        args=(result_queue,shared_dict),
+        args=(result_queue, shared_dict),
         daemon=True
     ).start()
 
@@ -54,7 +47,7 @@ async def lifespan(application: FastAPI):
     app_state.producer = producer
     app_state.consumer = consumer
     app_state.queues = (input_queue, result_queue)
-    app_state.shared_dict=shared_dict
+    app_state.shared_dict = shared_dict
 
     yield
 
@@ -78,7 +71,6 @@ app.mount("/static", StaticFiles(directory="static"), name="static")
 app.include_router(router)
 
 
-
 @app.get("/", response_class=HTMLResponse)
 async def video_page(request: Request):
     return templates.TemplateResponse(
@@ -89,4 +81,5 @@ async def video_page(request: Request):
 
 if __name__ == '__main__':
     import uvicorn
+
     uvicorn.run(app, host="0.0.0.0", port=8000)

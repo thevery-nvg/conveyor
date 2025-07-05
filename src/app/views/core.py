@@ -1,19 +1,12 @@
 from fastapi import APIRouter
-from fastapi import FastAPI, Request
-from fastapi.responses import StreamingResponse, HTMLResponse
-import cv2
+from fastapi import Request
+from fastapi.responses import StreamingResponse
 import uuid
 
+from app.services.manager import client_manager, app_state
+from src.app.services.common import DISPLAY_BUFFER, generate_frames
 
-from app.middlewares.track_clients import track_clients_middleware
-from app.services.consumer import frame_consumer
-from app.services.producer import frame_producer
-from app.services.manager import client_manager,app_state
-from src.app.services.utils import draw_boxes_from_roi, draw_boxes, draw_boxes_with_recovery
-from src.app.services.common import DISPLAY_BUFFER,lock,result_consumer,generate_frames
 router = APIRouter()
-
-
 
 
 @router.get("/video_feed")
@@ -30,7 +23,7 @@ async def video_feed(request: Request):
 async def buffer_status():
     return {
         "buffer_size": len(DISPLAY_BUFFER),
-        "delay_seconds": len(DISPLAY_BUFFER) / app_state.shared_dict.get('fps',25),
+        "delay_seconds": len(DISPLAY_BUFFER) / app_state.shared_dict.get('fps', 25),
         "clients_count": len(client_manager.active_clients),
     }
 
@@ -41,4 +34,4 @@ async def tortilla_stats():
         "producer_alive": app_state.producer.is_alive(),
         "consumer_alive": app_state.consumer.is_alive(),
         "queue_input": app_state.queues[0].qsize() if app_state.queues else 0,
-        "queue_result": app_state.queues[1].qsize() if app_state.queues else 0,}
+        "queue_result": app_state.queues[1].qsize() if app_state.queues else 0, }

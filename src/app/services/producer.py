@@ -1,7 +1,6 @@
-from datetime import datetime
-
 import cv2
 import time
+from datetime import datetime
 from multiprocessing import Queue
 
 from src.app.services.utils import get_video_params
