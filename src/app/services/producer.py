@@ -11,7 +11,7 @@ def frame_producer(video_path: str, output_queue: Queue,shared_dict):
     cap = cv2.VideoCapture(video_path)
     frame_num = 0
     shared_dict.update(get_video_params(cap))
-    skip_frames = 2
+    skip_frames = 1
     roi_x1, roi_x2 = 550, 1800
     roi_y1, roi_y2 = 230, 850
     try:
@@ -25,7 +25,8 @@ def frame_producer(video_path: str, output_queue: Queue,shared_dict):
             if output_queue.qsize() > 50:
                 time.sleep(0.1)
                 continue
-            if frame_num % (skip_frames + 1) != 1:
+            if frame_num % (skip_frames + 1) == 1:
+                cv2.putText(roi_frame, str(frame_num), (20, 20), cv2.FONT_HERSHEY_SIMPLEX, 0.6, (0, 255, 0), 2)
                 frame_data = {
                     'frame': roi_frame,
                     'timestamp': time.time(),
