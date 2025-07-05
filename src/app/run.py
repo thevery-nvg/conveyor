@@ -10,7 +10,7 @@ from app.middlewares.track_clients import track_clients_middleware
 from app.services.consumer import frame_consumer
 from app.services.producer import frame_producer
 from app.services.manager import app_state
-from src.app.services.common import result_consumer
+from src.app.services.consumer import result_consumer
 from src.app.views.core import router
 
 templates = Jinja2Templates(directory="templates")

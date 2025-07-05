@@ -4,7 +4,7 @@ from fastapi.responses import StreamingResponse
 import uuid
 
 from app.services.manager import client_manager, app_state
-from src.app.services.common import DISPLAY_BUFFER, generate_frames
+from src.app.services.consumer import DISPLAY_BUFFER, generate_frames
 
 router = APIRouter()
 
