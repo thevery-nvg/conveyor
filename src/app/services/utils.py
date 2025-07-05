@@ -3,6 +3,7 @@ import cv2
 from ultralytics import YOLO
 from ultralytics.engine.results import Results
 import numpy as np
+import subprocess
 
 zones = {
     "upper": (380, 0, 580, 195),
@@ -232,6 +233,25 @@ def get_sizes_from_contours(frame, zone_ids):
 
 
 
+
+
+
+
+def get_gpu_utilization():
+    try:
+        result = subprocess.check_output(
+        ['nvidia-smi', '--query-gpu=utilization.gpu,memory.used,memory.total',
+        '--format=csv,nounits,noheader'],
+        encoding='utf-8'
+        )
+        lines = result.strip().split('\n')
+        for idx, line in enumerate(lines):
+            gpu_util, mem_used, mem_total = map(str.strip, line.split(','))
+        return f" {idx}: {gpu_util}%",f" | {mem_used} MiB / {mem_total} MiB"
+    except FileNotFoundError:
+        return "❌ nvidia-smi not found. Make sure NVIDIA drivers are installed."
+    except Exception as e:
+        return f"⚠️ Error: {e}"
 
 
 
