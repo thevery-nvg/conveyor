@@ -38,7 +38,6 @@ def draw_boxes_from_roi(results: list[Results],frame: np.ndarray,roi_x1:int,roi_
         track_ids = results[0].boxes.id.int().cpu().tolist()
         classes = results[0].boxes.cls.int().cpu().tolist()
         confidences = results[0].boxes.conf.cpu().tolist()
-        print(sizes)
         for box, track_id, cls, conf in zip(boxes, track_ids, classes, confidences):
             x1, y1, x2, y2 = box
             x1=roi_x1+int(x1)
@@ -177,10 +176,10 @@ def calculate_contour_dimensions(contour, tolerance=5):
     return {
         'width': max_width,
         'height': max_height,
-        'min_x': np.min(points[:, 0]),
-        'max_x': np.max(points[:, 0]),
-        'min_y': np.min(points[:, 1]),
-        'max_y': np.max(points[:, 1]),
+        # 'min_x': np.min(points[:, 0]),
+        # 'max_x': np.max(points[:, 0]),
+        # 'min_y': np.min(points[:, 1]),
+        # 'max_y': np.max(points[:, 1]),
     }
 
 
@@ -192,8 +191,8 @@ def is_box_fully_in_zone(box, zone):
     box_x1, box_y1, box_x2, box_y2 = box
     zone_x1, zone_y1, zone_x2, zone_y2 = zone
 
-    # Проверяем, что все углы бокса внутри зоны
-    return (box_x1 >= zone_x1 and box_x2 <= zone_x2 and
+    #  все углы бокса внутри зоны
+    return (box_x1 >= zone_x1 and #box_x2 <= zone_x2 and
             box_y1 >= zone_y1 and box_y2 <= zone_y2)
 
 

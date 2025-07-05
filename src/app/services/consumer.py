@@ -7,6 +7,7 @@ import cv2
 import queue
 import time
 
+from app.database.db_manager import save_measurement
 from app.services.utils import draw_boxes, draw_boxes_from_roi, zones, is_box_fully_in_zone, global_sizes, \
     get_sizes_from_contours
 
