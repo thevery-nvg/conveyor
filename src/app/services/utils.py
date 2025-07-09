@@ -31,7 +31,9 @@ def draw_boxes(results,frame):
                         cv2.FONT_HERSHEY_SIMPLEX, 0.6, (0, 255, 0), 2)
 
 
-
+red=(0,0,255)
+green=(0,255,0)
+blue=(255,0,0)
 def draw_boxes_from_roi(results: list[Results],frame: np.ndarray,roi_x1:int,roi_y1:int,sizes)->None:
     if results[0].boxes.id is not None:
         # Получаем данные о треках
@@ -51,12 +53,16 @@ def draw_boxes_from_roi(results: list[Results],frame: np.ndarray,roi_x1:int,roi_
 
             # Добавляем информацию об объекте
             label = f"ID: {track_id}"
-            cv2.putText(frame, label, (int(x1) + 10, int(y1) + 30),cv2.FONT_HERSHEY_SIMPLEX, 0.6, (0, 255, 0), 2)
+            cv2.putText(frame, label, (int(x1) + 10, int(y1) + 30),cv2.FONT_HERSHEY_SIMPLEX, 0.6, green, 2)
             if track_id in sizes:
                 w = sizes[track_id].get("w")
                 h = sizes[track_id].get("h")
-                cv2.putText(frame, f"w:{w:.2f}", (int(x1) + 10, int(y1) + 60),cv2.FONT_HERSHEY_SIMPLEX, 0.6, (0, 255, 0), 2)
-                cv2.putText(frame, f"h:{h:.2f}", (int(x1) + 10, int(y1) + 90),cv2.FONT_HERSHEY_SIMPLEX, 0.6, (0, 255, 0), 2)
+                cv2.putText(frame, f"w:{w:.2f}", (int(x1) + 10, int(y1) + 60),cv2.FONT_HERSHEY_SIMPLEX, 0.6, green, 2)
+                cv2.putText(frame, f"h:{h:.2f}", (int(x1) + 10, int(y1) + 90),cv2.FONT_HERSHEY_SIMPLEX, 0.6, green, 2)
+                if abs(w-h)<1.91:
+                    cv2.putText(frame, f"o:{w-h:.2f}", (int(x1) + 10, int(y1) + 120),cv2.FONT_HERSHEY_SIMPLEX, 0.6, green, 2)
+                else:
+                    cv2.putText(frame, f"o:{w-h:.2f}", (int(x1) + 10, int(y1) + 120),cv2.FONT_HERSHEY_SIMPLEX, 0.6, red, 2)
 
 TRACK_HISTORY = deque(maxlen=30)
 def draw_boxes_with_recovery(frame, results):
@@ -247,7 +253,7 @@ def get_gpu_utilization():
         lines = result.strip().split('\n')
         for idx, line in enumerate(lines):
             gpu_util, mem_used, mem_total = map(str.strip, line.split(','))
-        return f" {idx}: {gpu_util}%",f" | {mem_used} MiB / {mem_total} MiB"
+        return f" {idx} {gpu_util}%",f"{mem_used} MiB / {mem_total} MiB"
     except FileNotFoundError:
         return "❌ nvidia-smi not found. Make sure NVIDIA drivers are installed."
     except Exception as e:
