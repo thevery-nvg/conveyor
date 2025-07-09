@@ -5,6 +5,8 @@ from fastapi.templating import Jinja2Templates
 from fastapi.staticfiles import StaticFiles
 from multiprocessing import Queue, Process, Manager
 import threading
+import os
+from pathlib import Path
 
 from app.middlewares.track_clients import track_clients_middleware
 from app.services.consumer import frame_consumer
@@ -13,7 +15,9 @@ from app.services.manager import app_state
 from src.app.services.consumer import result_consumer
 from src.app.views.core import router
 
-templates = Jinja2Templates(directory="templates")
+current_dir = Path(__file__).resolve().parent
+templates_dir = os.path.join(current_dir, "templates")
+templates = Jinja2Templates(directory=templates_dir)
 
 
 @asynccontextmanager
@@ -67,7 +71,9 @@ async def lifespan(application: FastAPI):
 
 app = FastAPI(lifespan=lifespan)
 app.middleware("http")(track_clients_middleware)
-app.mount("/static", StaticFiles(directory="static"), name="static")
+
+static_dir = os.path.join(current_dir, "static")
+app.mount("/static", StaticFiles(directory=static_dir), name="static")
 app.include_router(router)
 
 
