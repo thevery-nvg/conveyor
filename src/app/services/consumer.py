@@ -7,8 +7,8 @@ import cv2
 import queue
 import time
 
-from app.database.db_manager import save_measurement
-from app.services.utils import draw_boxes, draw_boxes_from_roi, zones, is_box_fully_in_zone, global_sizes, \
+
+from app.services.utils import  draw_boxes_from_roi, zones, is_box_fully_in_zone, global_sizes, \
     get_sizes_from_contours
 
 torch.backends.cudnn.benchmark = True
@@ -40,14 +40,14 @@ def frame_consumer(input_queue: Queue, output_queue: Queue,shared_dict):
                 frame_buffer = frame_buffer[-5:] if len(frame_buffer) > 5 else frame_buffer
                 frame_buffer.append(frame)
                 torch.cuda.empty_cache()
-                with torch.no_grad():
+                with torch.no_grad(), torch.cuda.amp.autocast():
                     results = model.track(
                         source=frame,
                         tracker=tracker_config,
                         persist=True,
-                        conf=0.5,
+                        conf=0.8,
                         device='cuda',
-                        half=True,  # FP16 ускорение
+                        half=True,
                         imgsz=512,
                         verbose=True,
                         classes=[0]
