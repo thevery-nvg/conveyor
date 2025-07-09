@@ -4,6 +4,7 @@ from fastapi.responses import StreamingResponse
 import uuid
 
 from app.services.manager import client_manager, app_state
+from app.services.utils import get_gpu_utilization
 from src.app.services.consumer import DISPLAY_BUFFER, generate_frames
 
 router = APIRouter()
@@ -27,11 +28,18 @@ async def buffer_status():
         "clients_count": len(client_manager.active_clients),
     }
 
+import psutil
 
 @router.get("/tortilla_stats")
 async def tortilla_stats():
+    gpu,vram=get_gpu_utilization()
     return {
         "producer_alive": app_state.producer.is_alive(),
         "consumer_alive": app_state.consumer.is_alive(),
         "queue_input": app_state.queues[0].qsize() if app_state.queues else 0,
-        "queue_result": app_state.queues[1].qsize() if app_state.queues else 0, }
+        "queue_result": app_state.queues[1].qsize() if app_state.queues else 0,
+        "gpu":gpu,
+        "vRAM":vram,
+        "CPU":f"{psutil.cpu_percent()} %",
+        "RAM":f"{psutil.virtual_memory().percent} %"
+    }
