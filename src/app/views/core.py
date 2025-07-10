@@ -1,14 +1,19 @@
+import os
+import uuid
+from pathlib import Path
+
 from fastapi import APIRouter
 from fastapi import Request
 from fastapi.responses import StreamingResponse
-import uuid
-
-from app.services.manager import client_manager, app_state
-from app.services.utils import get_gpu_utilization
-from src.app.services.consumer import DISPLAY_BUFFER, generate_frames
+from fastapi.templating import Jinja2Templates
+from services.consumer import DISPLAY_BUFFER, generate_frames
+from services.manager import client_manager, app_state
+from services.utils import get_gpu_utilization
 
 router = APIRouter()
-
+current_dir = Path(__file__).resolve().parent
+templates_dir = os.path.join(current_dir, "templates")
+templates = Jinja2Templates(directory=templates_dir)
 
 @router.get("/video_feed")
 async def video_feed(request: Request):

@@ -1,9 +1,9 @@
-import cv2
 import time
 from datetime import datetime
 from multiprocessing import Queue
 
-from src.app.services.utils import get_video_params
+import cv2
+from services.utils import get_video_params
 
 
 def frame_producer(video_path: str, output_queue: Queue,shared_dict):

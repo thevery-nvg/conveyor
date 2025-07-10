@@ -11,7 +11,7 @@ import os
 from pathlib import Path
 
 
-from app.services.utils import  draw_boxes_from_roi, zones, is_box_fully_in_zone, global_sizes, \
+from services.utils import  draw_boxes_from_roi, zones, is_box_fully_in_zone, global_sizes, \
     get_sizes_from_contours
 
 torch.backends.cudnn.benchmark = True

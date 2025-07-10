@@ -8,12 +8,12 @@ import threading
 import os
 from pathlib import Path
 
-from app.middlewares.track_clients import track_clients_middleware
-from app.services.consumer import frame_consumer
-from app.services.producer import frame_producer
-from app.services.manager import app_state
-from src.app.services.consumer import result_consumer
-from src.app.views.core import router
+from middlewares.track_clients import track_clients_middleware
+from services.consumer import frame_consumer
+from services.producer import frame_producer
+from services.manager import app_state
+from services.consumer import result_consumer
+from views.core import router
 
 current_dir = Path(__file__).resolve().parent
 templates_dir = os.path.join(current_dir, "templates")
