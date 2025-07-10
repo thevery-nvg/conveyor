@@ -10,8 +10,7 @@ import time
 import os
 from pathlib import Path
 
-
-from services.utils import  draw_boxes_from_roi, zones, is_box_fully_in_zone, global_sizes, \
+from services.utils import draw_boxes_from_roi, zones, is_box_fully_in_zone, global_sizes, \
     get_sizes_from_contours
 
 torch.backends.cudnn.benchmark = True
@@ -26,9 +25,10 @@ lock = threading.Lock()
 current_dir = Path(__file__).resolve().parent.parent.parent
 models_dir = os.path.join(current_dir, "models")
 
-def frame_consumer(input_queue: Queue, output_queue: Queue,shared_dict):
-    model = YOLO(model=os.path.join(models_dir,"best_for_tracking_512.pt")).to("cuda")
-    #pip install torch torchvision --extra-index-url https://download.pytorch.org/whl/cu118
+
+def frame_consumer(input_queue: Queue, output_queue: Queue, shared_dict):
+    model = YOLO(model=os.path.join(models_dir, "best_for_tracking_512.pt")).to("cuda")
+    # pip install torch torchvision --extra-index-url https://download.pytorch.org/whl/cu118
     tracker_config = "bytetrack.yaml"
     frame_buffer = []
 
@@ -90,6 +90,7 @@ def frame_consumer(input_queue: Queue, output_queue: Queue,shared_dict):
         torch.cuda.empty_cache()
         output_queue.put(None)
 
+
 def result_consumer(result_queue: Queue, shared_dict):
     try:
         while True:
@@ -117,7 +118,7 @@ def result_consumer(result_queue: Queue, shared_dict):
                                     break
                     sizes = get_sizes_from_contours(frame, zone_ids)
                     global_sizes.update(sizes)
-                    draw_boxes_from_roi(results,frame,roi_x1,roi_y1,global_sizes)
+                    draw_boxes_from_roi(results, frame, roi_x1, roi_y1, global_sizes)
                     DISPLAY_BUFFER.append(result)
 
             except queue.Empty:

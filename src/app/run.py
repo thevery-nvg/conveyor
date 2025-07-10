@@ -1,6 +1,5 @@
 from contextlib import asynccontextmanager
-from fastapi import FastAPI, Request
-from fastapi.responses import HTMLResponse
+from fastapi import FastAPI
 from fastapi.templating import Jinja2Templates
 from fastapi.staticfiles import StaticFiles
 from multiprocessing import Queue, Process, Manager
@@ -13,11 +12,10 @@ from services.consumer import frame_consumer
 from services.producer import frame_producer
 from services.manager import app_state
 from services.consumer import result_consumer
-from views.core import router
+from core.core_router import core_router
 
-current_dir = Path(__file__).resolve().parent
-templates_dir = os.path.join(current_dir, "templates")
-templates = Jinja2Templates(directory=templates_dir)
+
+# from app.auth.auth_routers import auth_router,users_router
 
 
 @asynccontextmanager
@@ -72,17 +70,16 @@ async def lifespan(application: FastAPI):
 app = FastAPI(lifespan=lifespan)
 app.middleware("http")(track_clients_middleware)
 
+current_dir = Path(__file__).resolve().parent
 static_dir = os.path.join(current_dir, "static")
+templates_dir = os.path.join(current_dir, "templates")
+
+templates = Jinja2Templates(directory=templates_dir)
 app.mount("/static", StaticFiles(directory=static_dir), name="static")
-app.include_router(router)
 
-
-@app.get("/", response_class=HTMLResponse)
-async def video_page(request: Request):
-    return templates.TemplateResponse(
-        "index.html",
-        {"request": request, "title": "Stream"}
-    )
+app.include_router(core_router)
+# app.include_router(auth_router)
+# app.include_router(users_router)
 
 
 if __name__ == '__main__':
