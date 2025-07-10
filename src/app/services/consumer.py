@@ -1,3 +1,4 @@
+import numpy as np
 from ultralytics import YOLO
 import torch
 import threading
@@ -6,6 +7,8 @@ from multiprocessing import Queue
 import cv2
 import queue
 import time
+import os
+from pathlib import Path
 
 
 from app.services.utils import  draw_boxes_from_roi, zones, is_box_fully_in_zone, global_sizes, \
@@ -20,9 +23,12 @@ roi_y1, roi_y2 = 230, 850
 DISPLAY_BUFFER = deque(maxlen=50)
 lock = threading.Lock()
 
+current_dir = Path(__file__).resolve().parent.parent.parent
+models_dir = os.path.join(current_dir, "models")
+
 def frame_consumer(input_queue: Queue, output_queue: Queue,shared_dict):
+    model = YOLO(model=os.path.join(models_dir,"best_for_tracking_512.pt")).to("cuda")
     #pip install torch torchvision --extra-index-url https://download.pytorch.org/whl/cu118
-    model = YOLO(model="D:\\Python\\conveyor\\src\\models\\best_for_tracking_512.pt").to("cuda")
     tracker_config = "bytetrack.yaml"
     frame_buffer = []
 
