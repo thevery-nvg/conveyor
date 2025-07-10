@@ -36,10 +36,14 @@ def frame_consumer(input_queue: Queue, output_queue: Queue,shared_dict):
                 # Ограничиваем размер очереди результатов
                 if output_queue.qsize() > 50:
                     continue
+
                 frame = frame_data['frame'][roi_y1:roi_y2, roi_x1:roi_x2]
-                frame_buffer = frame_buffer[-5:] if len(frame_buffer) > 5 else frame_buffer
+
+                frame_buffer = [frame, *frame_buffer][:5]
                 frame_buffer.append(frame)
+
                 torch.cuda.empty_cache()
+
                 with torch.no_grad(), torch.cuda.amp.autocast():
                     results = model.track(
                         source=frame,
