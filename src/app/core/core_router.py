@@ -3,7 +3,7 @@ from fastapi.staticfiles import StaticFiles
 import os
 import uuid
 from pathlib import Path
-from fastapi import APIRouter
+from fastapi import APIRouter, Depends
 from fastapi import Request
 from fastapi.responses import StreamingResponse
 from fastapi.templating import Jinja2Templates
@@ -62,17 +62,22 @@ async def tortilla_stats():
         "RAM": f"{psutil.virtual_memory().percent} %"
     }
 
+from app.auth.auth_routers import current_user
+from app.auth.models import User
 
 @core_router.get("/", response_class=HTMLResponse)
-async def video_page(request: Request):
+async def video_page(request: Request, user: User = Depends(current_user)):
+    print(user)
+
     return templates.TemplateResponse(
         "index.html",
-        {"request": request, "title": "system > status > video_feed"}
+        {"request": request, "title": "system > status > video_feed","user": user}
     )
 
 @core_router.get("/login", response_class=HTMLResponse)
-async def stats_page(request: Request):
+async def stats_page(request: Request, user: User = Depends(current_user)):
+    print(user)
     return templates.TemplateResponse(
         "login.html",
-        {"request": request, "title": "system > login"}
+        {"request": request, "title": "system > login","user": user}
     )

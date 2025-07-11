@@ -20,7 +20,7 @@ if TYPE_CHECKING:
 
 class User(Base, SQLAlchemyBaseUserTable[int]):
     email: Mapped[str] = mapped_column(
-        String(length=320), unique=True, index=True, nullable=False
+        String(length=100), unique=True, index=True, nullable=False
     )
     hashed_password: Mapped[str] = mapped_column(String(length=1024), nullable=False)
     is_active: Mapped[bool] = mapped_column(Boolean, default=True, nullable=False)

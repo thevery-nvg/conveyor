@@ -7,6 +7,8 @@ import threading
 import os
 from pathlib import Path
 
+from starlette.middleware.cors import CORSMiddleware
+
 from app.middlewares.track_clients import track_clients_middleware
 from app.services.consumer import frame_consumer
 from app.services.producer import frame_producer
@@ -68,6 +70,15 @@ async def lifespan(application: FastAPI):
 
 
 app = FastAPI(lifespan=lifespan)
+
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=["http://0.0.0.0:8000", "http://localhost:8000"],
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
+
 app.middleware("http")(track_clients_middleware)
 
 current_dir = Path(__file__).resolve().parent

@@ -1,10 +1,6 @@
-from sqlalchemy import create_engine
-from sqlalchemy.orm import sessionmaker
-
-SQLALCHEMY_DATABASE_URL = "sqlite+aiosqlite:///D:/Python/conveyor/src/tortillas.db"
-
 from sqlalchemy.ext.asyncio import create_async_engine, AsyncEngine, async_sessionmaker
 
+SQLALCHEMY_DATABASE_URL = "sqlite+aiosqlite:///D:/Python/conveyor/src/tortillas.db"
 
 
 class DatabaseHelper:
@@ -45,9 +41,9 @@ class DatabaseHelper:
 
 # Инициализация для SQLite
 db_helper = DatabaseHelper(
-    url=str(SQLALCHEMY_DATABASE_URL),  # Или берем из settings, если там указано
+    url=str(SQLALCHEMY_DATABASE_URL),
     echo=False,
-    pool_size= 5,
-    max_overflow= 10,
+    pool_size=5,
+    max_overflow=10,
     connect_args={"check_same_thread": False}  # Обязательно для SQLite
 )
