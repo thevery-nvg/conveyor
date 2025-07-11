@@ -1,0 +1,27 @@
+{% extends 'base.html' %}
+
+{% block title %}
+Profile
+{% endblock %}
+{% block content %}
+    <div class="container">
+        <div id="profile-data">
+            <h1>Loading...</h1>
+        </div>
+
+    </div>
+    <script src="auth_scripts.js"></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', async () => {
+            const profileData = await getProfile();
+            if (profileData) {
+                document.getElementById('profile-data').innerHTML = `
+                    <p><strong>ID:</strong> ${profileData.id}</p>
+                    <p><strong>Email:</strong> ${profileData.email}</p>
+                    <p><strong>Is Active:</strong> ${profileData.is_active}</p>
+                    <p><strong>Is Verified:</strong> ${profileData.is_verified}</p>
+                `;
+            }
+        });
+    </script>
+{% endblock %}

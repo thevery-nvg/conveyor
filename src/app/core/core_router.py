@@ -7,6 +7,8 @@ from fastapi import APIRouter, Depends
 from fastapi import Request
 from fastapi.responses import StreamingResponse
 from fastapi.templating import Jinja2Templates
+from starlette import status
+
 from app.services.consumer import DISPLAY_BUFFER, generate_frames
 from app.services.manager import client_manager, app_state
 from app.services.utils import get_gpu_utilization
@@ -66,18 +68,31 @@ from app.auth.auth_routers import current_user
 from app.auth.models import User
 
 @core_router.get("/", response_class=HTMLResponse)
-async def video_page(request: Request, user: User = Depends(current_user)):
-    print(user)
-
-    return templates.TemplateResponse(
-        "index.html",
-        {"request": request, "title": "system > status > video_feed","user": user}
-    )
+async def root(request: Request, user: User = Depends(current_user)):
+    if user:
+        return templates.TemplateResponse(
+            "index.html",
+            {"request": request, "title": "system > status > video_feed","user": user}
+        )
+    else:
+        return RedirectResponse(url="/login")
 
 @core_router.get("/login", response_class=HTMLResponse)
-async def stats_page(request: Request, user: User = Depends(current_user)):
-    print(user)
+async def login_page(request: Request, user: User = Depends(current_user)):
     return templates.TemplateResponse(
         "login.html",
         {"request": request, "title": "system > login","user": user}
+    )
+
+@core_router.get("/stats", response_class=HTMLResponse)
+async def stats_page(request: Request, user: User = Depends(current_user)):
+    return templates.TemplateResponse(
+        "stats.html",
+        {"request": request, "title": "system > status > stats","user": user}
+    )
+@core_router.get("/profile", response_class=HTMLResponse)
+async def stats_page(request: Request, user: User = Depends(current_user)):
+    return templates.TemplateResponse(
+        "profile.html",
+        {"request": request, "title": "profiles > me","user": user}
     )
