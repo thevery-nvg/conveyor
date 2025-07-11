@@ -7,15 +7,15 @@ import threading
 import os
 from pathlib import Path
 
-from middlewares.track_clients import track_clients_middleware
-from services.consumer import frame_consumer
-from services.producer import frame_producer
-from services.manager import app_state
-from services.consumer import result_consumer
-from core.core_router import core_router
+from app.middlewares.track_clients import track_clients_middleware
+from app.services.consumer import frame_consumer
+from app.services.producer import frame_producer
+from app.services.manager import app_state
+from app.services.consumer import result_consumer
+from app.core.core_router import core_router
 
 
-# from app.auth.auth_routers import auth_router,users_router
+from app.auth.auth_routers import auth_router,users_router
 
 
 @asynccontextmanager
@@ -29,7 +29,7 @@ async def lifespan(application: FastAPI):
     shared_dict['count_tortillas'] = 0
     producer = Process(
         target=frame_producer,
-        args=("D:\\Python\\tortillas_static\\data\\video\\vid1.avi", input_queue, shared_dict)
+        args=("D:\\Python\\tortillas_static\\data\\video\\vid12.avi", input_queue, shared_dict)
     )
 
     consumer = Process(
@@ -78,8 +78,8 @@ templates = Jinja2Templates(directory=templates_dir)
 app.mount("/static", StaticFiles(directory=static_dir), name="static")
 
 app.include_router(core_router)
-# app.include_router(auth_router)
-# app.include_router(users_router)
+app.include_router(auth_router)
+app.include_router(users_router)
 
 
 if __name__ == '__main__':

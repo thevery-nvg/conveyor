@@ -1,7 +1,7 @@
 from sqlalchemy import MetaData
 from sqlalchemy.orm import DeclarativeBase, declared_attr
 from sqlalchemy.orm import Mapped, mapped_column
-from src.app.core.utils import camel_case_to_snake_case
+from app.core.utils import camel_case_to_snake_case
 
 naming_convention: dict[str, str] = {
     "ix": "ix_%(column_0_label)s",
@@ -22,3 +22,18 @@ class Base(DeclarativeBase):
     @declared_attr
     def __tablename__(cls):
         return f"{camel_case_to_snake_case(cls.__name__)}s"
+
+
+from sqlalchemy import Column, Integer, Float, DateTime
+
+
+
+class TortillaMeasurement(Base):
+    id = Column(Integer, primary_key=True, index=True)
+    track_id = Column(Integer, index=True)
+    width_cm = Column(Float)
+    height_cm = Column(Float)
+    timestamp = Column(DateTime)
+
+    def __repr__(self):
+        return f"<Tortilla {self.track_id} (W: {self.width_cm}, H: {self.height_cm})>"

@@ -1,23 +1,32 @@
+from sqlalchemy import create_engine
+from sqlalchemy.orm import sessionmaker
+
+SQLALCHEMY_DATABASE_URL = "sqlite+aiosqlite:///./tortillas.db"
+
 from sqlalchemy.ext.asyncio import create_async_engine, AsyncEngine, async_sessionmaker
 
-from ..config import settings
 
 
 class DatabaseHelper:
     def __init__(
             self,
-            url: str,
+            url: str = str(SQLALCHEMY_DATABASE_URL),  # Дефолтный URL для SQLite
             echo: bool = False,
-            echo_pool: bool = False,
             pool_size: int = 5,
             max_overflow: int = 10,
+            connect_args: dict = None
     ):
+        # Для SQLite нужно добавить специальные connect_args
+        default_connect_args = {"check_same_thread": False}
+        if connect_args:
+            default_connect_args.update(connect_args)
+
         self.engine: AsyncEngine = create_async_engine(
             url,
             echo=echo,
-            echo_pool=echo_pool,
-            max_overflow=max_overflow,
             pool_size=pool_size,
+            max_overflow=max_overflow,
+            connect_args=default_connect_args  # Добавляем параметры для SQLite
         )
         self.session_factory = async_sessionmaker(
             bind=self.engine,
@@ -34,10 +43,11 @@ class DatabaseHelper:
             yield session
 
 
+# Инициализация для SQLite
 db_helper = DatabaseHelper(
-    url=str(settings.db.url),
-    echo=settings.db.echo,
-    echo_pool=settings.db.echo_pool,
-    pool_size=settings.db.pool_size,
-    max_overflow=settings.db.max_overflow,
+    url=str(SQLALCHEMY_DATABASE_URL),  # Или берем из settings, если там указано
+    echo=False,
+    pool_size= 5,
+    max_overflow= 10,
+    connect_args={"check_same_thread": False}  # Обязательно для SQLite
 )

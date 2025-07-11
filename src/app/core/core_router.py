@@ -7,9 +7,9 @@ from fastapi import APIRouter
 from fastapi import Request
 from fastapi.responses import StreamingResponse
 from fastapi.templating import Jinja2Templates
-from services.consumer import DISPLAY_BUFFER, generate_frames
-from services.manager import client_manager, app_state
-from services.utils import get_gpu_utilization
+from app.services.consumer import DISPLAY_BUFFER, generate_frames
+from app.services.manager import client_manager, app_state
+from app.services.utils import get_gpu_utilization
 import psutil
 
 
@@ -70,8 +70,8 @@ async def video_page(request: Request):
         {"request": request, "title": "system > status > video_feed"}
     )
 
-@core_router.get("/stats", response_class=HTMLResponse)
-async def video_page(request: Request):
+@core_router.get("/login", response_class=HTMLResponse)
+async def stats_page(request: Request):
     return templates.TemplateResponse(
         "login.html",
         {"request": request, "title": "system > login"}

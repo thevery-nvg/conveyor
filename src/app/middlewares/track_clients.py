@@ -2,7 +2,7 @@ from fastapi import Request
 from fastapi.responses import StreamingResponse
 from starlette.background import BackgroundTask
 import uuid
-from services.manager import client_manager
+from app.services.manager import client_manager
 
 async def track_clients_middleware(request: Request, call_next):
     client_id = request.headers.get('X-Client-ID', str(uuid.uuid4()))

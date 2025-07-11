@@ -3,7 +3,7 @@ from datetime import datetime
 from multiprocessing import Queue
 
 import cv2
-from services.utils import get_video_params
+from app.services.utils import get_video_params
 
 
 def frame_producer(video_path: str, output_queue: Queue,shared_dict):
