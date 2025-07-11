@@ -67,5 +67,12 @@ async def tortilla_stats():
 async def video_page(request: Request):
     return templates.TemplateResponse(
         "index.html",
-        {"request": request, "title": "Stream"}
+        {"request": request, "title": "system > status > video_feed"}
+    )
+
+@core_router.get("/stats", response_class=HTMLResponse)
+async def video_page(request: Request):
+    return templates.TemplateResponse(
+        "stats.html",
+        {"request": request, "title": "system > status > stats"}
     )

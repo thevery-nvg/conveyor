@@ -1,12 +1,12 @@
 <ul>
     <li>
-        <button class="hacker-btn" onclick="root_redirect()"><span>Главная</span></button>
+        <button class="hacker-btn" onclick="root_redirect()"><span>Stream</span></button>
     </li>
     <li>
-        <button class="hacker-btn" onclick="upload_redirect()"><span>Upload</span></button>
+        <button class="hacker-btn" onclick="stats_redirect()"><span>Stats</span></button>
     </li>
     <li>
-        <button class="hacker-btn" onclick="snake_redirect()"><span>Змейка</span></button>
+        <button class="hacker-btn" onclick="snake_redirect()"><span>Play snake</span></button>
     </li>
     <li class="move-left">
         {% if not user %}
@@ -31,7 +31,7 @@ function snake_redirect() {
     document.location.href = '/snake';
 }
 
-function upload_redirect() {
-    document.location.href = '/upload';
+function stats_redirect() {
+    document.location.href = '/stats';
 }
 </script>
