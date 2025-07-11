@@ -1,0 +1,37 @@
+<ul>
+    <li>
+        <button class="hacker-btn" onclick="root_redirect()"><span>Главная</span></button>
+    </li>
+    <li>
+        <button class="hacker-btn" onclick="upload_redirect()"><span>Upload</span></button>
+    </li>
+    <li>
+        <button class="hacker-btn" onclick="snake_redirect()"><span>Змейка</span></button>
+    </li>
+    <li class="move-left">
+        {% if not user %}
+        <button class="hacker-btn" onclick="login_redirect()" id="login-button"><span>Log in
+            </span></button>
+        {% else %}
+        <button class="hacker-btn" id="logout-button"><span>[{{user.email}}]</span></button>
+        {% endif %}
+    </li>
+</ul>
+
+<script language="JavaScript">
+    function root_redirect() {
+        document.location.href = '/';
+    }
+
+function login_redirect() {
+    document.location.href = '/login_proxy';
+}
+
+function snake_redirect() {
+    document.location.href = '/snake';
+}
+
+function upload_redirect() {
+    document.location.href = '/upload';
+}
+</script>

@@ -119,20 +119,7 @@ async function updateTortillaStats() {
             statsContainer.appendChild(item);
         }
 
-//        // Добавляем случайный анализ
-//        const fakeAnalysis = [
-//            "> PATTERN RECOGNITION: ACTIVE",
-//            "> OBJECT TRACKING: STABLE",
-//            "> MOTION DETECTION: 12 CHANGES",
-//            "> COLOR ANALYSIS: WITHIN NORMS",
-//            "> FRAME CONSISTENCY: 98.2%"
-//        ];
-//
-//        const randomAnalysis = fakeAnalysis[Math.floor(Math.random() * fakeAnalysis.length)];
-//        const fakeItem = document.createElement('div');
-//        fakeItem.className = 'analysis-item';
-//        fakeItem.textContent = randomAnalysis;
-//        statsContainer.appendChild(fakeItem);
+
 
     } catch (e) {
         console.error('Failed to get tortilla stats:', e);

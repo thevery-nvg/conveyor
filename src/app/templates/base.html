@@ -1,0 +1,27 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="cache-control" content="no-cache, no-store, must-revalidate"/>
+    <meta http-equiv="pragma" content="no-cache"/>
+    <meta http-equiv="expires" content="0"/>
+    <title>{% block title %}{% endblock %}</title>
+    <link rel="stylesheet" href="static/css/style.css">
+</head>
+<body>
+
+<nav class="nav-bar">
+  {% include 'navbar.html' %}
+</nav>
+<h1>{{ title }} > SYSTEM STATUS > VIDEO FEED</h1>
+
+<div class="container">
+    {% block content %}{%endblock %}
+</div>
+
+<script
+        src="static/main.js">
+</script>
+</body>
+</html>

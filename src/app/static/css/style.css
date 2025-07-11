@@ -1,0 +1,434 @@
+body {
+	font-family: 'Courier New', monospace;
+	background-color: black;
+	color: #0F0;
+	margin: 0;
+	padding: 20px;
+	overflow-x: hidden;
+}
+
+h1 {
+	color: #0F0;
+	text-shadow: 0 0 5px #0F0;
+	border-bottom: 1px dashed #0F0;
+	padding-bottom: 10px;
+	font-size: 24px;
+	letter-spacing: 2px;
+}
+
+.video-container {
+	display: flex;
+	gap: 20px;
+	margin-bottom: 20px;
+}
+
+#videoFeed {
+	width: 960px;
+	height: 540px;
+	background: black;
+	border: 2px solid #0F0;
+	box-shadow: 0 0 10px #0F0;
+}
+
+.analysis-panel {
+	width: 300px;
+	height: 512px;
+	border: 1px solid #0F0;
+	padding: 15px;
+	background: rgba(0, 20, 0, 0.2);
+	overflow-y: auto;
+	position: relative;
+}
+
+.analysis-panel h3 {
+	margin-top: 0;
+	border-bottom: 1px dashed #0F0;
+	padding-bottom: 5px;
+	color: #0F0;
+}
+
+.analysis-item {
+	margin-bottom: 10px;
+	padding-bottom: 10px;
+	border-bottom: 1px dotted rgba(0, 255, 0, 0.2);
+}
+
+.status {
+	margin-top: 10px;
+	padding: 15px;
+	background: rgba(0, 30, 0, 0.3);
+	border: 1px solid #0F0;
+	border-radius: 0;
+	font-size: 18px;
+	position: relative;
+	overflow: hidden;
+}
+
+.status:before {
+	content: "";
+	position: absolute;
+	top: 0;
+	left: 0;
+	right: 0;
+	height: 1px;
+	background: linear-gradient(to right, transparent, #0F0, transparent);
+	animation: scanline 3s linear infinite;
+}
+
+@keyframes scanline {
+	0% {
+		top: 0;
+	}
+
+	100% {
+		top: 100%;
+	}
+}
+
+@keyframes flicker {
+	0% {
+		opacity: 0.9;
+	}
+
+	50% {
+		opacity: 1;
+	}
+
+	100% {
+		opacity: 0.9;
+	}
+}
+
+body {
+	animation: flicker 0.1s infinite alternate;
+}
+
+#bufferStatus,
+#delay {
+	color: #FF0;
+	font-weight: bold;
+}
+
+body:after {
+	content: "";
+	position: fixed;
+	top: 0;
+	left: 0;
+	width: 100%;
+	height: 100%;
+	background:
+		linear-gradient(rgba(0, 255, 0, 0.03) 1px, transparent 1px),
+		linear-gradient(90deg, rgba(0, 255, 0, 0.03) 1px, transparent 1px);
+	background-size: 3px 3px;
+	pointer-events: none;
+	z-index: -1;
+}
+
+.loading {
+	position: fixed;
+	bottom: 10px;
+	right: 10px;
+	color: #0F0;
+	font-size: 12px;
+}
+
+.loading:after {
+	content: "...";
+	animation: dots 1.5s infinite;
+}
+
+@keyframes dots {
+
+	0%,
+	20% {
+		content: ".";
+	}
+
+	40% {
+		content: "..";
+	}
+
+	60%,
+	100% {
+		content: "...";
+	}
+}
+
+/* Стили для полосы прокрутки */
+.analysis-panel::-webkit-scrollbar {
+	width: 5px;
+}
+
+.analysis-panel::-webkit-scrollbar-track {
+	background: rgba(0, 20, 0, 0.1);
+}
+
+.analysis-panel::-webkit-scrollbar-thumb {
+	background: #0F0;
+}
+
+.critical {
+	color: #F00 !important;
+	animation: blink 0.5s infinite alternate;
+}
+
+.warning {
+	color: #FF0 !important;
+}
+
+.success {
+	color: #0F0 !important;
+}
+
+@keyframes blink {
+	0% {
+		opacity: 0.3;
+	}
+
+	100% {
+		opacity: 1;
+	}
+}
+
+/*Основные стили для навигационного меню*/
+.nav-bar {
+  background-color: transparent;
+  padding: 15px;
+  color: #0F0;
+  position: relative;
+  overflow: hidden;
+  border: 1px dashed #0F0;
+}
+
+.nav-bar:before {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background:
+    linear-gradient(rgba(0, 255, 0, 0.03) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(0, 255, 0, 0.03) 1px, transparent 1px);
+  background-size: 3px 3px;
+  pointer-events: none;
+  z-index: -1;
+}
+
+.nav-bar:after {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: rgba(0, 0, 0, 0.7);
+  z-index: -2;
+}
+
+.nav-bar ul {
+  list-style-type: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  gap: 20px;
+}
+
+.nav-bar li a {
+  color: #0F0;
+  text-decoration: none;
+  font-size: 16px;
+  padding: 8px 15px;
+  border-radius: 4px;
+  transition: all 0.3s;
+  border: 1px solid transparent;
+}
+
+.nav-bar li a:hover {
+  background-color: rgba(0, 255, 0, 0.1);
+  border: 1px solid #0F0;
+  text-shadow: 0 0 5px #0F0;
+}
+
+/* Добавим эффект сканирования для активного пункта меню */
+.nav-bar li a.active {
+  position: relative;
+  overflow: hidden;
+}
+
+.nav-bar li a.active:after {
+  content: "";
+  position: absolute;
+  top: -50%;
+  left: -60%;
+  width: 20%;
+  height: 200%;
+  background: rgba(0, 255, 0, 0.1);
+  transform: rotate(30deg);
+  animation: scanline 3s linear infinite;
+}
+
+.move-left {
+  margin-left: auto; /* Перемещает элемент влево */
+}
+
+
+/* Основные стили для кнопок */
+.hacker-btn {
+	font-family: 'Courier New', monospace;
+	background-color: transparent;
+	color: #0F0;
+	border: 1px solid #0F0;
+	padding: 8px 15px;
+	margin: 5px;
+	cursor: pointer;
+	text-transform: uppercase;
+	letter-spacing: 1px;
+	font-size: 14px;
+	position: relative;
+	overflow: hidden;
+	transition: all 0.3s;
+	box-shadow: 0 0 5px rgba(0, 255, 0, 0.3);
+}
+
+/* Эффект при наведении */
+.hacker-btn:hover {
+	background-color: rgba(0, 255, 0, 0.1);
+	box-shadow: 0 0 10px rgba(0, 255, 0, 0.5);
+	text-shadow: 0 0 5px #0F0;
+}
+
+/* Эффект при нажатии */
+.hacker-btn:active {
+	background-color: rgba(0, 255, 0, 0.2);
+	transform: translateY(1px);
+}
+
+/* Анимация "сканирования" для кнопок */
+.hacker-btn:after {
+	content: "";
+	position: absolute;
+	top: -50%;
+	left: -60%;
+	width: 20%;
+	height: 200%;
+	background: rgba(0, 255, 0, 0.1);
+	transform: rotate(30deg);
+	transition: all 0.3s;
+}
+
+.hacker-btn:hover:after {
+	left: 120%;
+}
+
+/* Специальные стили для разных типов кнопок */
+.hacker-btn.primary {
+	border-width: 2px;
+	padding: 10px 20px;
+	font-weight: bold;
+}
+
+.hacker-btn.danger {
+	color: #F00;
+	border-color: #F00;
+	box-shadow: 0 0 5px rgba(255, 0, 0, 0.3);
+}
+
+.hacker-btn.danger:hover {
+	background-color: rgba(255, 0, 0, 0.1);
+	box-shadow: 0 0 10px rgba(255, 0, 0, 0.5);
+	text-shadow: 0 0 5px #F00;
+}
+
+.hacker-btn.warning {
+	color: #FF0;
+	border-color: #FF0;
+	box-shadow: 0 0 5px rgba(255, 255, 0, 0.3);
+}
+
+.hacker-btn.warning:hover {
+	background-color: rgba(255, 255, 0, 0.1);
+	box-shadow: 0 0 10px rgba(255, 255, 0, 0.5);
+	text-shadow: 0 0 5px #FF0;
+}
+
+.hacker-btn.disabled {
+	color: #555;
+	border-color: #555;
+	cursor: not-allowed;
+	box-shadow: none;
+}
+
+.hacker-btn.disabled:hover {
+	background-color: transparent;
+	box-shadow: none;
+	text-shadow: none;
+}
+
+/* Кнопка с эффектом "ввода пароля" */
+.hacker-btn.access {
+	position: relative;
+	overflow: hidden;
+}
+
+.hacker-btn.access:before {
+	content: "ACCESS DENIED";
+	position: absolute;
+	width: 100%;
+	height: 100%;
+	background: rgba(0, 0, 0, 0.9);
+	top: 0;
+	left: 0;
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	transform: translateY(-100%);
+	transition: all 0.3s;
+}
+
+.hacker-btn.access:hover:before {
+	transform: translateY(0);
+}
+
+/* Кнопка с мигающим текстом */
+.hacker-btn.blink {
+	animation: btn-blink 1.5s infinite;
+}
+
+@keyframes btn-blink {
+
+	0%,
+	100% {
+		opacity: 1;
+	}
+
+	50% {
+		opacity: 0.5;
+	}
+}
+
+/* Группа кнопок */
+.hacker-btn-group {
+	display: flex;
+	margin: 15px 0;
+	border: 1px solid #0F0;
+	padding: 5px;
+	background: rgba(0, 20, 0, 0.1);
+}
+
+.hacker-btn-group .hacker-btn {
+	margin: 0;
+	border-radius: 0;
+	border-right: none;
+}
+
+.hacker-btn-group .hacker-btn:last-child {
+	border-right: 1px solid #0F0;
+}
+
+/* Кнопка с иконкой (можно использовать символы ASCII) */
+.hacker-btn.icon-btn {
+	display: flex;
+	align-items: center;
+	gap: 8px;
+}
