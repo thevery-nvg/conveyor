@@ -1,7 +1,7 @@
 from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker
 
-SQLALCHEMY_DATABASE_URL = "sqlite+aiosqlite:///./tortillas.db"
+SQLALCHEMY_DATABASE_URL = "sqlite+aiosqlite:///D:/Python/conveyor/src/tortillas.db"
 
 from sqlalchemy.ext.asyncio import create_async_engine, AsyncEngine, async_sessionmaker
 
