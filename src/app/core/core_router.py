@@ -73,6 +73,6 @@ async def video_page(request: Request):
 @core_router.get("/stats", response_class=HTMLResponse)
 async def video_page(request: Request):
     return templates.TemplateResponse(
-        "stats.html",
-        {"request": request, "title": "system > status > stats"}
+        "login.html",
+        {"request": request, "title": "system > login"}
     )

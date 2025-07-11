@@ -5,5 +5,23 @@ Stream
 {% endblock %}
 
 {% block content %}
-{% include 'video.html' %}
+<div class="video-container">
+    <img id="videoFeed" src="/video_feed">
+
+    <div class="analysis-panel">
+        <h3>VIDEO ANALYSIS</h3>
+        <div id="tortillaStats">
+            <div class="analysis-item">> Initializing analysis module...</div>
+        </div>
+    </div>
+</div>
+
+<div class="status">
+    <p>> BUFFER: <span id="bufferStatus">0</span>
+        FRAMES (<span id="delay">0</span> SEC DELAY)
+        CLIENTS COUNT <span id="clients_count">0</span></p>
+    <p>> CONNECTION: <span style="color:#0F0">ACTIVE</span></p>
+    <p>> SYSTEM TIME: <span id="systemTime">--:--:--</span></p>
+</div>
+
 {% endblock %}
