@@ -69,7 +69,11 @@ async def lifespan(application: FastAPI):
         app_state.consumer.terminate()
 
 
-app = FastAPI(lifespan=lifespan)
+app = FastAPI(lifespan=lifespan,
+              docs_url=None,
+              openapi_url=None,
+              redoc_url=None,
+              )
 
 app.add_middleware(
     CORSMiddleware,
@@ -95,5 +99,4 @@ app.include_router(users_router)
 
 if __name__ == '__main__':
     import uvicorn
-
     uvicorn.run(app, host="0.0.0.0", port=8000)
