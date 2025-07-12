@@ -64,14 +64,30 @@ def draw_boxes_from_roi(results: list[Results], frame: np.ndarray, roi_x1: int, 
             if track_id in sizes:
                 w = sizes[track_id].get("w")
                 h = sizes[track_id].get("h")
-                cv2.putText(frame, f"w:{w:.2f}", (int(x1) + 10, int(y1) + 60), cv2.FONT_HERSHEY_SIMPLEX, 0.6, green, 2)
-                cv2.putText(frame, f"h:{h:.2f}", (int(x1) + 10, int(y1) + 90), cv2.FONT_HERSHEY_SIMPLEX, 0.6, green, 2)
-                if abs(w - h) < 1.91:
-                    cv2.putText(frame, f"o:{w - h:.2f}", (int(x1) + 10, int(y1) + 120), cv2.FONT_HERSHEY_SIMPLEX, 0.6,
-                                green, 2)
-                else:
-                    cv2.putText(frame, f"o:{w - h:.2f}", (int(x1) + 10, int(y1) + 120), cv2.FONT_HERSHEY_SIMPLEX, 0.6,
-                                red, 2)
+                min_d=min(w,h)
+                max_d=max(w,h)
+                delta=abs(max_d - min_d)
+
+                x, y = int(x1) + 10, int(y1)
+                positions = {
+                    'max_d': (x, y + 60),
+                    'min_d': (x, y + 90),
+                    'oval': (x, y + 120)
+                }
+
+                font = cv2.FONT_HERSHEY_SIMPLEX
+                scale = 0.6
+                thickness = 2
+
+                # Функция для добавления текста с автоматическим выбором цвета
+                def put_colored_text(frame, text, value, condition, position):
+                    color = green if condition else red
+                    cv2.putText(frame, f"{text}:{value:.2f}", position, font, scale, color, thickness)
+
+                # Добавляем текст с проверкой условий
+                put_colored_text(frame, "max_d", max_d, 25.4 < max_d < 28, positions['max_d'])
+                put_colored_text(frame, "min_d", min_d, 23.5 < min_d < 26.1, positions['min_d'])
+                put_colored_text(frame, "oval", delta, delta < 1.91, positions['oval'])
 
 
 def get_video_params(cap: cv2.VideoCapture) -> dict:
