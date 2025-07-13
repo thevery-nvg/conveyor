@@ -80,14 +80,14 @@ def draw_boxes_from_roi(results: list[Results], frame: np.ndarray, roi_x1: int, 
                 thickness = 2
 
                 # Функция для добавления текста с автоматическим выбором цвета
-                def put_colored_text(frame, text, value, condition, position):
+                def put_colored_text(frm, text, value, condition, position):
                     color = green if condition else red
-                    cv2.putText(frame, f"{text}:{value:.2f}", position, font, scale, color, thickness)
+                    cv2.putText(frm, f"{text}:{value:.2f}", position, font, scale, color, thickness)
 
                 # Добавляем текст с проверкой условий
-                put_colored_text(frame, "max_d", max_d, 25.4 < max_d < 28, positions['max_d'])
-                put_colored_text(frame, "min_d", min_d, 23.5 < min_d < 26.1, positions['min_d'])
-                put_colored_text(frame, "oval", delta, delta < 1.91, positions['oval'])
+                put_colored_text(frame, "max_d", sizes[track_id].get("max_d"), sizes[track_id].get("valid_max_d"), positions['max_d'])
+                put_colored_text(frame, "min_d", sizes[track_id].get("min_d"), sizes[track_id].get("valid_min_d"), positions['min_d'])
+                put_colored_text(frame, "oval", sizes[track_id].get("oval"), sizes[track_id].get("valid_oval"), positions['oval'])
 
 
 def get_video_params(cap: cv2.VideoCapture) -> dict:
@@ -212,8 +212,15 @@ def get_sizes_from_contours(frame, zone_ids):
         sizes = calculate_contour_dimensions(cnts[0])
         w = pixels_to_centimeters_ultimate(sizes["width"])
         h = pixels_to_centimeters_ultimate(sizes["height"])
-        sizes[zone_ids[zone_name]] = {"w": w, "h": h}
-
+        min_d = min(w, h)
+        max_d = max(w, h)
+        oval = abs(max_d - min_d)
+        sizes[zone_ids[zone_name]] = {"min_d": min_d,
+                                      "max_d": max_d,
+                                      "valid_max_d": 25.4 < max_d < 28,
+                                      "valid_min_d": 23.5 < min_d < 26.1,
+                                      "valid_oval": oval < 1.91,
+                                      "oval": oval}
     return sizes
 
 
