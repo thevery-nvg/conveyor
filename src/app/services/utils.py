@@ -42,6 +42,9 @@ def draw_boxes(results, frame):
 
 
 def draw_boxes_from_roi(results: list[Results], frame: np.ndarray, roi_x1: int, roi_y1: int, sizes) -> None:
+    font = cv2.FONT_HERSHEY_SIMPLEX
+    scale = 0.6
+    thickness = 2
     if results[0].boxes.id is not None:
         # Получаем данные о треках
         boxes = results[0].boxes.xyxy.cpu()
@@ -62,23 +65,12 @@ def draw_boxes_from_roi(results: list[Results], frame: np.ndarray, roi_x1: int, 
             label = f"ID: {track_id}"
             cv2.putText(frame, label, (int(x1) + 10, int(y1) + 30), cv2.FONT_HERSHEY_SIMPLEX, 0.6, green, 2)
             if track_id in sizes:
-                w = sizes[track_id].get("w")
-                h = sizes[track_id].get("h")
-                min_d=min(w,h)
-                max_d=max(w,h)
-                delta=abs(max_d - min_d)
-
                 x, y = int(x1) + 10, int(y1)
                 positions = {
                     'max_d': (x, y + 60),
                     'min_d': (x, y + 90),
                     'oval': (x, y + 120)
                 }
-
-                font = cv2.FONT_HERSHEY_SIMPLEX
-                scale = 0.6
-                thickness = 2
-
                 # Функция для добавления текста с автоматическим выбором цвета
                 def put_colored_text(frm, text, value, condition, position):
                     color = green if condition else red
@@ -217,10 +209,11 @@ def get_sizes_from_contours(frame, zone_ids):
         oval = abs(max_d - min_d)
         sizes[zone_ids[zone_name]] = {"min_d": min_d,
                                       "max_d": max_d,
+                                      "oval": oval,
                                       "valid_max_d": 25.4 < max_d < 28,
                                       "valid_min_d": 23.5 < min_d < 26.1,
                                       "valid_oval": oval < 1.91,
-                                      "oval": oval}
+                                      }
     return sizes
 
 
