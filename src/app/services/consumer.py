@@ -10,7 +10,7 @@ import time
 import os
 from pathlib import Path
 
-from services.utils import draw_boxes_from_roi, zones, is_box_fully_in_zone, global_sizes, \
+from app.services.utils import draw_boxes_from_roi, zones, is_box_fully_in_zone, global_sizes, \
     get_sizes_from_contours
 
 torch.backends.cudnn.benchmark = True
@@ -75,7 +75,7 @@ def frame_consumer(input_queue: Queue, output_queue: Queue, shared_dict):
                             break
                 result_data = {
                     'frame': frame_data['frame'],
-                    'results': results,
+                    # 'results': results,
                     'timestamp': frame_data['timestamp'],
                     'frame_num': frame_data['frame_num'],
                 }
@@ -86,8 +86,8 @@ def frame_consumer(input_queue: Queue, output_queue: Queue, shared_dict):
                 continue
 
     finally:
-        del model
-        torch.cuda.empty_cache()
+        # del model
+        # torch.cuda.empty_cache()
         output_queue.put(None)
 
 
