@@ -39,12 +39,16 @@ def draw_boxes(results, frame):
 
 
 
-
-
-def draw_boxes_from_roi(results: list[Results], frame: np.ndarray, roi_x1: int, roi_y1: int, sizes) -> None:
+def put_colored_text(frm, text, value, condition, position):
+    # Функция для добавления текста с автоматическим выбором цвета
     font = cv2.FONT_HERSHEY_SIMPLEX
     scale = 0.6
     thickness = 2
+    c = green if condition else red
+    cv2.putText(frm, f"{text}:{value:.2f}", position, font, scale, c, thickness)
+
+def draw_boxes_from_roi(results: list[Results], frame: np.ndarray, roi_x1: int, roi_y1: int, sizes) -> None:
+    color=green
     if results[0].boxes.id is not None:
         # Получаем данные о треках
         boxes = results[0].boxes.xyxy.cpu()
@@ -58,28 +62,30 @@ def draw_boxes_from_roi(results: list[Results], frame: np.ndarray, roi_x1: int, 
             x2 = roi_x1 + int(x2)
             y2 = roi_y1 + int(y2)
 
-            # Рисуем рамку
-            cv2.rectangle(frame, (int(x1), int(y1)), (int(x2), int(y2)), (0, 255, 0), 2)
-
-            # Добавляем информацию об объекте
-            label = f"ID: {track_id}"
-            cv2.putText(frame, label, (int(x1) + 10, int(y1) + 30), cv2.FONT_HERSHEY_SIMPLEX, 0.6, green, 2)
             if track_id in sizes:
+                if all([sizes[track_id].get("valid_max_d"),
+                        sizes[track_id].get("valid_min_d"),
+                        sizes[track_id].get("valid_oval")]):
+                    color = green
+                else:
+                    color = red
+                cv2.rectangle(frame, (int(x1), int(y1)), (int(x2), int(y2)), color, 2)
+                cv2.putText(frame, f"ID: {track_id}", (int(x1) + 10, int(y1) + 30), cv2.FONT_HERSHEY_SIMPLEX, 0.6, color, 2)
                 x, y = int(x1) + 10, int(y1)
                 positions = {
                     'max_d': (x, y + 60),
                     'min_d': (x, y + 90),
                     'oval': (x, y + 120)
                 }
-                # Функция для добавления текста с автоматическим выбором цвета
-                def put_colored_text(frm, text, value, condition, position):
-                    color = green if condition else red
-                    cv2.putText(frm, f"{text}:{value:.2f}", position, font, scale, color, thickness)
 
                 # Добавляем текст с проверкой условий
                 put_colored_text(frame, "max_d", sizes[track_id].get("max_d"), sizes[track_id].get("valid_max_d"), positions['max_d'])
                 put_colored_text(frame, "min_d", sizes[track_id].get("min_d"), sizes[track_id].get("valid_min_d"), positions['min_d'])
                 put_colored_text(frame, "oval", sizes[track_id].get("oval"), sizes[track_id].get("valid_oval"), positions['oval'])
+            else:
+                cv2.rectangle(frame, (int(x1), int(y1)), (int(x2), int(y2)), blue, 2)
+                cv2.putText(frame, f"ID: {track_id}", (int(x1) + 10, int(y1) + 30), cv2.FONT_HERSHEY_SIMPLEX, 0.6,
+                            blue, 2)
 
 
 def get_video_params(cap: cv2.VideoCapture) -> dict:
