@@ -13,7 +13,8 @@ from app.services.consumer import DISPLAY_BUFFER, generate_frames
 from app.services.manager import client_manager, app_state
 from app.services.utils import get_gpu_utilization
 import psutil
-
+from app.auth.auth_routers import current_user
+from app.auth.models import User
 
 core_router = APIRouter(
     tags=["Core"],
@@ -46,7 +47,6 @@ async def buffer_status():
     return {
         "buffer_size": len(DISPLAY_BUFFER),
         "delay_seconds": len(DISPLAY_BUFFER) / app_state.shared_dict.get('fps', 25),
-        "clients_count": len(client_manager.active_clients),
     }
 
 
@@ -64,18 +64,16 @@ async def tortilla_stats():
         "RAM": f"{psutil.virtual_memory().percent} %"
     }
 
-from app.auth.auth_routers import current_user
-from app.auth.models import User
 
 @core_router.get("/", response_class=HTMLResponse)
 async def root(request: Request, user: User = Depends(current_user)):
-    if user:
-        return templates.TemplateResponse(
-            "index.html",
-            {"request": request, "title": "system > status > video_feed","user": user}
-        )
-    else:
-        return RedirectResponse(url="/login")
+    # if user:
+    return templates.TemplateResponse(
+        "index.html",
+        {"request": request, "title": "system > status > video_feed","user": user}
+    )
+    # else:
+    #     return RedirectResponse(url="/login")
 
 @core_router.get("/login", response_class=HTMLResponse)
 async def login_page(request: Request, user: User = Depends(current_user)):

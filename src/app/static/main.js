@@ -70,7 +70,6 @@ async function updateStatus() {
         const data = await response.json();
         document.getElementById('bufferStatus').textContent = data.buffer_size;
         document.getElementById('delay').textContent = Math.round(data.delay_seconds);
-        document.getElementById('clients_count').textContent = Math.round(data.clients_count);
 
         // Обновляем системное время
         const now = new Date();
@@ -178,7 +177,7 @@ window.onload = function () {
     updateTortillaStats();
 
     // Эффект печатающегося заголовка
-    const titleElement = document.querySelector('h1');
+    const titleElement = document.querySelector('h2');
     const originalTitle = titleElement.textContent;
     titleElement.textContent = "";
     typeWriter(titleElement, originalTitle, 100);

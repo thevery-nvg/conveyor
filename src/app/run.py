@@ -1,3 +1,4 @@
+import asyncio
 from contextlib import asynccontextmanager
 from fastapi import FastAPI
 from fastapi.templating import Jinja2Templates
@@ -7,7 +8,7 @@ import threading
 import os
 from pathlib import Path
 
-from starlette.middleware.cors import CORSMiddleware
+from fastapi.middleware.cors import CORSMiddleware
 
 from app.middlewares.track_clients import track_clients_middleware
 from app.services.consumer import frame_consumer
@@ -29,6 +30,7 @@ async def lifespan(application: FastAPI):
     shared_dict = manager.dict()
     shared_dict['avg_time'] = 0
     shared_dict['count_tortillas'] = 0
+    main_loop = asyncio.get_event_loop()
     producer = Process(
         target=frame_producer,
         args=("D:\\Python\\tortillas_static\\data\\video\\vid1.avi", input_queue, shared_dict)
@@ -41,7 +43,7 @@ async def lifespan(application: FastAPI):
 
     threading.Thread(
         target=result_consumer,
-        args=(result_queue, shared_dict),
+        args=(result_queue, shared_dict,main_loop),
         daemon=True
     ).start()
 
