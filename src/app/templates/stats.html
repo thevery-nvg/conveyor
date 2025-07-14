@@ -5,5 +5,28 @@ Stats
 {% endblock %}
 
 {% block content %}
-Тут будут статистики
+<h2>Статистика за последние 10 дней</h2>
+<ul id="stats-list">
+  <li>Загрузка...</li>
+</ul>
+
+<script>
+document.addEventListener("DOMContentLoaded", async () => {
+  const response = await fetch("/api/stats");
+  const data = await response.json();
+  const statsList = document.getElementById("stats-list");
+  statsList.innerHTML = "";
+
+  if (data.length === 0) {
+    statsList.innerHTML = "<li>Нет данных</li>";
+    return;
+  }
+
+  data.forEach(stat => {
+    const li = document.createElement("li");
+    li.textContent = `${stat.date} —  ${stat.valid}✅,  Размер: ${stat.invalid_size}❌,  Овальность: ${stat.invalid_oval}❌`;
+    statsList.appendChild(li);
+  });
+});
+</script>
 {% endblock %}
