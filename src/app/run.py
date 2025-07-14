@@ -31,7 +31,7 @@ async def lifespan(application: FastAPI):
     shared_dict['count_tortillas'] = 0
     producer = Process(
         target=frame_producer,
-        args=("D:\\Python\\tortillas_static\\data\\video\\vid12.avi", input_queue, shared_dict)
+        args=("D:\\Python\\tortillas_static\\data\\video\\vid1.avi", input_queue, shared_dict)
     )
 
     consumer = Process(
@@ -60,13 +60,11 @@ async def lifespan(application: FastAPI):
     input_queue.put(None)
     result_queue.put(None)
 
-    app_state.producer.join()
-    app_state.consumer.join()
+    app_state.producer.join(timeout=5)
+    app_state.consumer.join(timeout=5)
 
-    if app_state.producer.is_alive():
-        app_state.producer.terminate()
-    if app_state.consumer.is_alive():
-        app_state.consumer.terminate()
+    app_state.producer.terminate()
+    app_state.consumer.terminate()
 
 
 app = FastAPI(lifespan=lifespan,
