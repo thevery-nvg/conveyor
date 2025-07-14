@@ -1,10 +1,15 @@
-from collections import  defaultdict
-from pathlib import Path
 import os
-import cv2
-from ultralytics.engine.results import Results
-import numpy as np
 import subprocess
+from collections import defaultdict
+from datetime import date
+from pathlib import Path
+
+import cv2
+import numpy as np
+from sqlalchemy import select
+from ultralytics.engine.results import Results
+
+from app.core.models.base import TortillaStats
 
 zones = {
     "upper": (380, 0, 580, 195),
@@ -14,8 +19,20 @@ zones = {
 red = (0, 0, 255)
 green = (0, 255, 0)
 blue = (255, 0, 0)
+class LimitedDict(dict):
+    def __init__(self, max_size: int, trim_to: int, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.max_size = max_size
+        self.trim_to = trim_to
 
-global_sizes = {}
+    def __setitem__(self, key, value):
+        if len(self) >= self.max_size:
+            # Удалить самые старые
+            for k in list(self.keys())[:len(self) - self.trim_to]:
+                del self[k]
+        super().__setitem__(key, value)
+
+global_sizes = LimitedDict(max_size=1000, trim_to=100)
 current_dir = Path(__file__).resolve().parent.parent.parent
 models_dir = os.path.join(current_dir, "models")
 
@@ -165,11 +182,11 @@ def calculate_contour_dimensions(contour, tolerance=5):
     # Вычисляем "локальную высоту" для каждого X
     local_heights = [max(ys) - min(ys) for ys in x_groups.values() if ys]
     max_height = max(local_heights) if local_heights else 0
-
-    return {
-        'width': max_width,
-        'height': max_height,
-    }
+    return max_width,max_height
+    # return {
+    #     'width': max_width,
+    #     'height': max_height,
+    # }
 
 
 def is_box_fully_in_zone(box, zone):
@@ -207,9 +224,9 @@ def get_sizes_from_contours(frame, zone_ids):
         _, blackened = cv2.threshold(gray, thresh=235, maxval=255, type=cv2.THRESH_BINARY)
         contours, _ = cv2.findContours(blackened, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
         cnts = sorted(contours, key=lambda x: cv2.contourArea(x), reverse=True)
-        sizes = calculate_contour_dimensions(cnts[0])
-        w = pixels_to_centimeters_ultimate(sizes["width"])
-        h = pixels_to_centimeters_ultimate(sizes["height"])
+        w,h = calculate_contour_dimensions(cnts[0])
+        w = pixels_to_centimeters_ultimate(w)
+        h = pixels_to_centimeters_ultimate(h)
         min_d = min(w, h)
         max_d = max(w, h)
         oval = abs(max_d - min_d)
@@ -218,6 +235,7 @@ def get_sizes_from_contours(frame, zone_ids):
                                       "oval": oval,
                                       "valid_max_d": 25.4 < max_d < 28,
                                       "valid_min_d": 23.5 < min_d < 26.1,
+                                      "valid_size": 23.5 < min_d < 26.1 and 25.4 < max_d < 28,
                                       "valid_oval": oval < 1.91,
                                       }
     return sizes
