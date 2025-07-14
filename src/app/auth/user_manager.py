@@ -122,7 +122,7 @@ class UserManager(IntegerIDMixin, BaseUserManager[User, int]):
                                             - contains e-mail...
         """
 
-        min_chars = 12
+        min_chars = 8
         msg = f"User [{user.email}] tried to enter password, but it was not valid.\n"
         if len(password) < min_chars:
             logger.info(f"{msg}Password should be at least {min_chars}characters.")

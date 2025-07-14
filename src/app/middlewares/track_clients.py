@@ -5,7 +5,7 @@ import uuid
 from app.services.manager import client_manager
 
 async def track_clients_middleware(request: Request, call_next):
-    client_id = request.headers.get('X-Client-ID', str(uuid.uuid4()))
+    client_id = request.headers.get('cookie', str(uuid.uuid4()))
 
     if request.url.path == "/video_feed":
         client_manager.add_client(client_id)

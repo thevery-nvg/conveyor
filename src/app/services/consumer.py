@@ -1,17 +1,22 @@
-import numpy as np
-from ultralytics import YOLO
-import torch
-import threading
-from collections import deque
-from multiprocessing import Queue
-import cv2
-import queue
-import time
+import asyncio
 import os
+import queue
+import threading
+import time
+from collections import deque, defaultdict
+from multiprocessing import Queue
 from pathlib import Path
+from loguru import logger
+import cv2
+import torch
+from ultralytics import YOLO
 
-from app.services.utils import draw_boxes_from_roi, zones, is_box_fully_in_zone, global_sizes, \
-    get_sizes_from_contours
+from app.core.models.db_helper import db_helper
+from app.services.utils import (draw_boxes_from_roi,
+                                zones,
+                                is_box_fully_in_zone,
+                                global_sizes,
+                                get_sizes_from_contours, write_stats)
 
 torch.backends.cudnn.benchmark = True
 torch.backends.cuda.enable_flash_sdp(True)  # Для RTX 30XX+
@@ -50,7 +55,7 @@ def frame_consumer(input_queue: Queue, output_queue: Queue, shared_dict):
 
                 torch.cuda.empty_cache()
 
-                with torch.no_grad(), torch.cuda.amp.autocast():
+                with torch.no_grad(), torch.cuda.amp.autocast(True,):
                     results = model.track(
                         source=frame,
                         tracker=tracker_config,
@@ -59,7 +64,7 @@ def frame_consumer(input_queue: Queue, output_queue: Queue, shared_dict):
                         device='cuda',
                         half=True,
                         imgsz=512,
-                        verbose=True,
+                        verbose=False,
                         classes=[0]
                     )
                 if results[0].boxes.id is None and len(frame_buffer) > 1:
@@ -75,7 +80,7 @@ def frame_consumer(input_queue: Queue, output_queue: Queue, shared_dict):
                             break
                 result_data = {
                     'frame': frame_data['frame'],
-                    # 'results': results,
+                    'results': results,
                     'timestamp': frame_data['timestamp'],
                     'frame_num': frame_data['frame_num'],
                 }
@@ -86,12 +91,13 @@ def frame_consumer(input_queue: Queue, output_queue: Queue, shared_dict):
                 continue
 
     finally:
-        # del model
-        # torch.cuda.empty_cache()
+        del model
+        torch.cuda.empty_cache()
         output_queue.put(None)
 
+stats_counter=defaultdict(int)
 
-def result_consumer(result_queue: Queue, shared_dict):
+def result_consumer(result_queue: Queue, shared_dict,loop):
     try:
         while True:
             try:
@@ -112,11 +118,26 @@ def result_consumer(result_queue: Queue, shared_dict):
                         for box, track_id in zip(boxes, track_ids):
                             for zone_name, zone_coords in zones.items():
                                 if is_box_fully_in_zone(box, zone_coords):
-                                    # Если объект попал в зону, сохраняем его ID
                                     if track_id not in global_sizes:
                                         zone_ids[zone_name] = track_id
                                     break
                     sizes = get_sizes_from_contours(frame, zone_ids)
+                    for d in sizes:
+                        valid_oval=sizes[d].get("valid_oval")
+                        valid_size=sizes[d].get("valid_size")
+                        if valid_oval is not None and valid_size is not None:
+                            if not valid_oval:
+                                stats_counter['invalid_oval']+=1
+                            elif not valid_size:
+                                stats_counter['invalid_size']+=1
+                            else:
+                                stats_counter['valid']+=1
+                        if sum(stats_counter.values())>10:
+                            s=stats_counter.copy()
+                            asyncio.run_coroutine_threadsafe(write_stats(db_helper.session_factory, s),loop)
+                            stats_counter.clear()
+                            logger.info("Stats written to db")
+
                     global_sizes.update(sizes)
                     draw_boxes_from_roi(results, frame, roi_x1, roi_y1, global_sizes)
                     DISPLAY_BUFFER.append(result)
