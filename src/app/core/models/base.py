@@ -1,7 +1,6 @@
-from sqlalchemy import MetaData
+from sqlalchemy import MetaData, DateTime, Date, Integer
 from sqlalchemy.orm import DeclarativeBase, declared_attr
 from sqlalchemy.orm import Mapped, mapped_column
-
 
 naming_convention: dict[str, str] = {
     "ix": "ix_%(column_0_label)s",
@@ -44,6 +43,13 @@ class Base(DeclarativeBase):
     @declared_attr
     def __tablename__(cls):
         return f"{camel_case_to_snake_case(cls.__name__)}s"
+
+class TortillaStats(Base):
+    __tablename__ = "tortilla_stats"
+    date: Mapped[Date] = mapped_column(Date)
+    invalid_oval:  Mapped[int] = mapped_column(Integer, nullable=False, default=0, server_default="0")
+    invalid_size:  Mapped[int] = mapped_column(Integer, nullable=False, default=0, server_default="0")
+    valid:         Mapped[int] = mapped_column(Integer, nullable=False, default=0, server_default="0")
 
 
 
