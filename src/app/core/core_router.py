@@ -1,3 +1,7 @@
+from datetime import date
+
+from sqlalchemy import select, desc
+
 from fastapi.responses import HTMLResponse, RedirectResponse
 from fastapi.staticfiles import StaticFiles
 import os
@@ -7,7 +11,11 @@ from fastapi import APIRouter, Depends
 from fastapi import Request
 from fastapi.responses import StreamingResponse
 from fastapi.templating import Jinja2Templates
-from starlette import status
+from sqlalchemy import desc
+
+from app.core.models.db_helper import db_helper
+from app.core.models.base import TortillaStats
+from app.core.schemas import TortillaStatsResponse
 
 from app.services.consumer import DISPLAY_BUFFER, generate_frames
 from app.services.manager import client_manager, app_state
@@ -51,17 +59,23 @@ async def buffer_status():
 
 
 @core_router.get("/tortilla_stats")
-async def tortilla_stats():
+async def tortilla_stats(user: User = Depends(current_user),session=Depends(db_helper.session_getter)):
     gpu, vram = get_gpu_utilization()
+    today = date.today()
+    result = await session.execute(
+        select(TortillaStats).where(TortillaStats.date == today)
+    )
+    stats = result.scalar_one_or_none()
     return {
-        "producer_alive": app_state.producer.is_alive(),
-        "consumer_alive": app_state.consumer.is_alive(),
-        "queue_input": app_state.queues[0].qsize() if app_state.queues else 0,
-        "queue_result": app_state.queues[1].qsize() if app_state.queues else 0,
         "gpu": gpu,
         "vRAM": vram,
         "CPU": f"{psutil.cpu_percent()} %",
-        "RAM": f"{psutil.virtual_memory().percent} %"
+        "RAM": f"{psutil.virtual_memory().percent} %",
+        "today": stats.date,
+        "perfect tortilla": stats.valid,
+        "invalid oval": stats.invalid_oval,
+        "invalid size": stats.invalid_size,
+        "total": stats.valid+stats.invalid_oval+stats.invalid_size
     }
 
 
@@ -94,3 +108,11 @@ async def stats_page(request: Request, user: User = Depends(current_user)):
         "profile.html",
         {"request": request, "title": "profiles > me","user": user}
     )
+
+@core_router.get("/api/stats",  response_model=list[TortillaStatsResponse])
+async def stats_page(user: User = Depends(current_user),session=Depends(db_helper.session_getter)):
+    result = await session.execute(
+        select(TortillaStats).order_by(desc(TortillaStats.date)).limit(10)
+    )
+    return result.scalars().all()
+
