@@ -256,3 +256,21 @@ def get_gpu_utilization():
         return "❌ nvidia-smi not found. Make sure NVIDIA drivers are installed."
     except Exception as e:
         return f"⚠️ Error: {e}"
+
+async def write_stats(session_factory, local_stats):
+    async with session_factory() as session:
+        today = date.today()
+        result = await session.execute(
+            select(TortillaStats).where(TortillaStats.date == today)
+        )
+        stats = result.scalar_one_or_none()
+
+        if not stats:
+            stats = TortillaStats(date=today,valid=0,invalid_size=0,invalid_oval=0)
+            session.add(stats)
+            await session.commit()
+
+        stats.valid += local_stats['valid']
+        stats.invalid_size += local_stats['invalid_size']
+        stats.invalid_oval += local_stats['invalid_oval']
+        await session.commit()
