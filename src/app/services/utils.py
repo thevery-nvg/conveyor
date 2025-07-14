@@ -251,7 +251,7 @@ def get_gpu_utilization():
         lines = result.strip().split('\n')
         for idx, line in enumerate(lines):
             gpu_util, mem_used, mem_total = map(str.strip, line.split(','))
-        return f" {idx} {gpu_util}%", f"{mem_used} MiB / {mem_total} MiB"
+        return f"{gpu_util}%", f"{mem_used} MiB / {mem_total} MiB"
     except FileNotFoundError:
         return "❌ nvidia-smi not found. Make sure NVIDIA drivers are installed."
     except Exception as e:

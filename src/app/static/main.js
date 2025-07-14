@@ -79,13 +79,15 @@ async function updateStatus() {
     } catch (e) {
         console.error('Status update failed:', e);
     }
-    setTimeout(updateStatus, 200);
+    setTimeout(updateStatus, 30000);
 }
 
 async function updateTortillaStats() {
     try {
         const response = await fetch('/tortilla_stats');
         const data = await response.json();
+
+
 
         const statsContainer = document.getElementById('tortillaStats');
         statsContainer.innerHTML = '';
@@ -120,6 +122,7 @@ async function updateTortillaStats() {
 
 
 
+
     } catch (e) {
         console.error('Failed to get tortilla stats:', e);
 
@@ -130,7 +133,7 @@ async function updateTortillaStats() {
         statsContainer.appendChild(errorItem);
     }
 
-    setTimeout(updateTortillaStats, 200);
+    setTimeout(updateTortillaStats, 1000);
 }
 
 // Автопереподключение видео при ошибке

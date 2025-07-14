@@ -132,7 +132,7 @@ def result_consumer(result_queue: Queue, shared_dict,loop):
                                 stats_counter['invalid_size']+=1
                             else:
                                 stats_counter['valid']+=1
-                        if sum(stats_counter.values())>10:
+                        if sum(stats_counter.values())>50:
                             s=stats_counter.copy()
                             asyncio.run_coroutine_threadsafe(write_stats(db_helper.session_factory, s),loop)
                             stats_counter.clear()
